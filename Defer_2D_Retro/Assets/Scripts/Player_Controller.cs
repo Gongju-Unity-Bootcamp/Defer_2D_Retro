@@ -2,22 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player_Move : MonoBehaviour
+public class Player_Controller : MonoBehaviour
 {
     [Header("Keys")]
     public KeyCode jumpKey = KeyCode.Z; // 점프키 설정
-
-    [Header("Movement")]
-    public float inputX;
-    public Vector2 moveVector;
-    public Rigidbody2D rb;
+    public KeyCode attackKey = KeyCode.X;   // 공격 키 설정
 
     [Header("Forces")]
     public float moveForce = 100f;
     public float gravityForce = 20f;
     public float jumpForce = 70f;
     public float wallSlideForce = 5f;
-    public float slidingForce = 50f;
+    public float slidingForce = 15f;
 
     [Header("Bools")]
     public bool isJump = false;
@@ -28,25 +24,46 @@ public class Player_Move : MonoBehaviour
     public bool isSliding = false;
     public bool isSlope = false;
 
+    [Header("Layers")]
+    public LayerMask wallLayer;
+    public LayerMask groundLayer;
+    public LayerMask slopeLayer;
+
+    [Header("Animation")]
+    public Animator anim;
+
+    [Header("Movement")]
+    public float inputX;
+    public Vector2 moveVector;
+    public Rigidbody2D rb;
+
+    [Header("GroundCheck")]
+    public Transform groundCheck;
+
     [Header("Wall Jump")]
+    public SpriteRenderer sr;
     public int jumpTime = 2;
     public float wallJumpDuration = 0.4f;
     public float wallJumpDirection;
     public float wallJumpCounter;
     public Transform wallCheck;
-    public Vector2 wallJumpPower = new Vector2(50f, 80f);
+    public Vector2 wallJumpPower = new Vector2(10f, 65f);
 
     [Header("Sliding")]
-    public CapsuleCollider2D cc;
+    public BoxCollider2D bc;
 
-    [Header("Layers")]
-    public LayerMask wallLayer;
+    [Header("Attack")]
+    public GameObject attackCollider1;
+    public GameObject attackCollider2;
+    public GameObject crouchAttackCollider;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        cc = GetComponent<CapsuleCollider2D>();
+        bc = GetComponent<BoxCollider2D>();
+        sr = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -54,11 +71,14 @@ public class Player_Move : MonoBehaviour
     {
         rb.AddForce(Vector3.down * gravityForce);   // 간단한 중력 구현
         Move();
+        GroundCheck();
         Jump();
         Crouch();
+        SlopeCheck();
         WallSlide();
         WallJump();
         Sliding();
+        Attack();
     }
 
     private void FixedUpdate()
@@ -81,11 +101,30 @@ public class Player_Move : MonoBehaviour
 
         if(inputX > 0)
         {
-            transform.localScale = new Vector2(1, transform.localScale.y);
+            transform.localScale = new Vector2(5, transform.localScale.y);
         }
         if (inputX < 0)
         {
-            transform.localScale = new Vector2(-1, transform.localScale.y);
+            transform.localScale = new Vector2(-5, transform.localScale.y);
+        }
+
+        anim.SetFloat("Move", Mathf.Abs(inputX));
+    }
+
+    /// <summary>
+    /// 캐릭터 발 밑 땅을 체크하는 함수
+    /// </summary>
+    public void GroundCheck()
+    {
+        isGround = false;
+        anim.SetBool("isAir", true);
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(groundCheck.position, 0.2f, groundLayer);
+
+        if(colliders.Length > 0)
+        {
+            isGround = true;
+            anim.SetBool("isAir", false);
         }
     }
 
@@ -101,7 +140,35 @@ public class Player_Move : MonoBehaviour
                 isJump = true;
                 rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);   // 위로 튀어오르는 힘
                 jumpTime -= 1;
+                anim.SetTrigger("Jump");
             }
+        }
+    }
+
+    /// <summary>
+    /// 경사면에 올라설 경우, 그 각도에 따라 캐릭터의 회전값이 변하도록 하는 함수
+    /// </summary>
+    public void SlopeCheck()
+    {
+        Vector3 front = new Vector3(transform.position.x + 1f, transform.position.y, 0);
+        Vector3 back = new Vector3(transform.position.x - 1f, transform.position.y, 0);
+
+        RaycastHit2D frontHit = Physics2D.Raycast(front, new Vector2(0, -1), Mathf.Infinity, slopeLayer);
+        RaycastHit2D backHit = Physics2D.Raycast(back, new Vector2(0, -1), Mathf.Infinity, slopeLayer);
+
+        Debug.DrawRay(front, new Vector3(0, -0.5f, 0), Color.red);
+        Debug.DrawRay(back, new Vector3(0, -0.5f, 0), Color.red);
+
+        // Check if the ray hits the slopeLayer
+        if (frontHit.collider != null && backHit.collider != null)
+        {
+            Vector3 frontPos = frontHit.point;
+            Vector3 backPos = backHit.point;
+            Vector3 lookDir = frontPos - backPos;
+            float SlopeAngle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg;
+
+            Quaternion charRotation = Quaternion.Euler(0, 0, SlopeAngle);
+            this.transform.rotation = charRotation;
         }
     }
 
@@ -128,6 +195,19 @@ public class Player_Move : MonoBehaviour
         {
             isWallSlide = false;
         }
+
+        // 벽에서 미끄러지고 있을 경우 스프라이트 문제를 해결하기 위해 X값 반전
+        if (isWallSlide)
+        {
+            sr.flipX = true;
+        }
+        else
+        {
+            sr.flipX = false;
+        }
+
+        // 벽에 붙은 애니메이션 재생을 위함
+        anim.SetBool("onWall", isWallSlide);
     }
 
     /// <summary>
@@ -158,7 +238,7 @@ public class Player_Move : MonoBehaviour
             {
                 Vector3 localScale = transform.localScale;
                 localScale *= -1f;
-                transform.localScale = new Vector2(localScale.x, 1);
+                transform.localScale = new Vector2(localScale.x, transform.localScale.y);
             }
 
             Invoke(nameof(StopWallJump), wallJumpDuration);
@@ -184,7 +264,7 @@ public class Player_Move : MonoBehaviour
         // 확인용 레이캐스트 그리기
         Debug.DrawRay(new Vector2(transform.position.x, transform.position.y + 1.25f), transform.up, Color.red);
 
-        if (Input.GetKeyDown(KeyCode.DownArrow))
+        if (Input.GetKeyDown(KeyCode.DownArrow) && !isJump)
         {
             // isCrouch는 이 부분 다음에 true로 바뀌기 때문에 먼저 실행됨
             // 앉을때 잠시 공중에 떠 있는 것을 막기 위해 아래로 힘을 더함
@@ -193,17 +273,21 @@ public class Player_Move : MonoBehaviour
                 rb.AddForce(Vector2.down * 10f, ForceMode2D.Impulse);
             }
             isCrouch = true;
-            cc.size = new Vector2(1, 1);
-            transform.localScale = new Vector2(transform.localScale.x, 0.5f);
+            bc.size = new Vector2(0.21f, 0.3f);
+            bc.offset = new Vector2(0, 0.02f);
+            transform.localScale = new Vector2(transform.localScale.x, transform.localScale.y);
             moveForce = 65f;
+            anim.SetBool("Crouch", true);   // 앉음 애니메이션 재생을 위함
         }
         if (!Input.GetKey(KeyCode.DownArrow) && !isJump)
         {
             // 레이캐스트가 닿았을 때 앉은 상태를 유지하도록
             if (rayHit && isCrouch)
             {
-                cc.size = new Vector2(1, 1);
-                transform.localScale = new Vector2(transform.localScale.x, 0.5f);
+                anim.SetBool("Crouch", true);
+                bc.size = new Vector2(0.21f, 0.3f);
+                bc.offset = new Vector2(0, 0.02f);
+                transform.localScale = new Vector2(transform.localScale.x, transform.localScale.y);
                 if (!isSlope)
                 {
                     moveForce = 65f;
@@ -211,9 +295,11 @@ public class Player_Move : MonoBehaviour
             }
             else
             {
+                anim.SetBool("Crouch", false);
                 isCrouch = false;
-                cc.size = new Vector2(1, 2);
-                transform.localScale = new Vector2(transform.localScale.x, 1f);
+                bc.size = new Vector2(0.21f, 0.38f);
+                bc.offset = new Vector2(0, 0);
+                transform.localScale = new Vector2(transform.localScale.x, transform.localScale.y);
                 if (!isSlope)
                 {
                     moveForce = 100f;
@@ -232,7 +318,10 @@ public class Player_Move : MonoBehaviour
             isSliding = true;
             rb.AddForce(new Vector2(transform.localScale.x * slidingForce, 0), ForceMode2D.Impulse);
 
-            Invoke(nameof(ResetSliding), 1f);
+            Invoke(nameof(ResetSliding), 0.5f);
+
+            anim.SetBool("Slide", true);    // 슬라이딩 애니메이션 재생을 위함
+            Invoke(nameof(ResetAnimSliding), 0.1f);
         }
     }
 
@@ -244,6 +333,53 @@ public class Player_Move : MonoBehaviour
         isSliding = false;
     }
 
+    /// <summary>
+    /// 애니메이션의 슬라이딩 bool 초기화용 함수
+    /// </summary>
+    public void ResetAnimSliding()
+    {
+        anim.SetBool("Slide", false);
+    }
+
+    /// <summary>
+    /// 공격키를 눌러 애니메이터의 attack 트리거를 활성화 하는 함수.
+    /// </summary>
+    public void Attack()
+    {
+        // 평상 공격
+        if (Input.GetKeyDown(attackKey))
+        {
+            anim.SetTrigger("Attack");  // 공격 애니메이션 재생을 위함
+        }
+    }
+
+    /// <summary>
+    /// 애니메이션 속 이벤트에 적용되는 함수. 1타 공격에 사용
+    /// </summary>
+    public void OnAttackCollision()
+    {
+        // 공격 애니메이션에 이벤트로 넣어서 활성화
+        attackCollider1.SetActive(true);
+    }
+
+    /// <summary>
+    /// 애니메이션 속 이벤트에 적용되는 함수. 2타 공격에 사용
+    /// </summary>
+    public void OnAttack2Collision()
+    {
+        // 공격 애니메이션에 이벤트로 넣어서 활성화
+        attackCollider2.SetActive(true);
+    }
+
+    /// <summary>
+    /// 애니메이션 속 이벤트에 적용되는 함수. 앉은 공격에 사용
+    /// </summary>
+    public void OnCrouchAttackCollision()
+    {
+        // 공격 애니메이션에 이벤트로 넣어서 활성화
+        crouchAttackCollider.SetActive(true);
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         float slopeForce = moveForce;
@@ -251,7 +387,6 @@ public class Player_Move : MonoBehaviour
         // 땅 또는 경사면에 닿을 경우 점프 횟수와 점프 상태, 점프 횟수를 초기화
         if (collision.collider.CompareTag("Ground") || collision.collider.CompareTag("Slope"))
         {
-            isGround = true;
             isJump = false;
 
             if (jumpTime >= 0)
@@ -282,11 +417,6 @@ public class Player_Move : MonoBehaviour
     private void OnCollisionExit2D(Collision2D collision)
     {
         float slopeForce = moveForce;
-
-        if (collision.collider.CompareTag("Ground") || collision.collider.CompareTag("Slope"))
-        {
-            isGround = false;
-        }
 
         if (collision.collider.CompareTag("Slope"))
         {

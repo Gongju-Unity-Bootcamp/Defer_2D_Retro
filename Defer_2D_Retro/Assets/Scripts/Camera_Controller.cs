@@ -6,7 +6,7 @@ public class Camera_Controller : MonoBehaviour
 {
     [Header("Player")]
     public Transform player;
-    public Player_Move PM;
+    public Player_Controller PC;
 
     [Header("Offsets")]
     public Vector3 targetVector;
@@ -21,7 +21,7 @@ public class Camera_Controller : MonoBehaviour
     void Start()
     {
         // 플레이어의 앉음 여부를 가져오기 위함
-        PM = FindObjectOfType<Player_Move>();
+        PC = FindObjectOfType<Player_Controller>();
     }
 
     // Update는 매 프레임마다 호출
@@ -61,7 +61,7 @@ public class Camera_Controller : MonoBehaviour
             offsetY = 0;
         }
 
-        if (Input.GetKey(KeyCode.DownArrow) || PM.isCrouch)
+        if ((Input.GetKey(KeyCode.DownArrow) || PC.isCrouch) && PC.isGround)
         {
             offsetZ = 5f;
         }
