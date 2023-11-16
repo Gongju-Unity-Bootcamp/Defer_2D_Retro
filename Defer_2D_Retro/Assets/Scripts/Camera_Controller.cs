@@ -26,7 +26,7 @@ public class Camera_Controller : MonoBehaviour
 
     // Update는 매 프레임마다 호출
     // FixedUpdate는 Fixed Timestep에 설정된 값에 따라 일정한 간격으로 호출
-    // 불규칙한 Update와 달리 일정하게 호출되므로 물리효과 등을 조정할 때 사용됨
+    // 불규칙한 Update와 달리 일정하게 호출됨
     void FixedUpdate()
     {
         // 카메라의 위치 = 플레이어의 위치 좌표 + 오프셋
@@ -47,11 +47,11 @@ public class Camera_Controller : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                offsetX = -5;
+                offsetX = -2;
             }
             if (Input.GetKey(KeyCode.RightArrow))
             {
-                offsetX = 5;
+                offsetX = 2;
             }
 
             if (Input.GetKey(KeyCode.UpArrow))

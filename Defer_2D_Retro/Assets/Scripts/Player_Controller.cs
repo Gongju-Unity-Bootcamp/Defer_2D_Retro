@@ -18,7 +18,6 @@ public class Player_Controller : MonoBehaviour
 
     [Header("Bools")]
     public bool isMove = false;
-    public bool isJump = false;
     public bool isWallJump = false;
     public bool isWallSlide = false;
     public bool isGround = false;
@@ -45,7 +44,7 @@ public class Player_Controller : MonoBehaviour
 
     [Header("Wall Jump")]
     public SpriteRenderer sr;
-    public int jumpTime = 2;
+    public int jumpTime = 1;
     public float wallJumpDuration = 0.4f;
     public float wallJumpDirection;
     public float wallJumpCounter;
@@ -140,11 +139,10 @@ public class Player_Controller : MonoBehaviour
         {
             anim.SetBool("isAir", false);
             isGround = true;
-            isJump = false;
 
-            if (jumpTime >= 0)
+            if (jumpTime != 1)
             {
-                jumpTime = 2;
+                jumpTime = 1;
             }
         }
     }
@@ -158,10 +156,9 @@ public class Player_Controller : MonoBehaviour
         {
             if (Input.GetKeyDown(jumpKey))
             {
-                isJump = true;
-                rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);   // 위로 튀어오르는 힘
                 jumpTime -= 1;
                 anim.SetTrigger("Jump");
+                rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);   // 위로 튀어오르는 힘
             }
         }
     }
@@ -298,7 +295,7 @@ public class Player_Controller : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow) && !isJump)
+        if (Input.GetKeyDown(KeyCode.DownArrow) && isGround)
         {
             // isCrouch는 이 부분 다음에 true로 바뀌기 때문에 먼저 실행됨
             // 앉을때 잠시 공중에 떠 있는 것을 막기 위해 아래로 힘을 더함
@@ -312,7 +309,7 @@ public class Player_Controller : MonoBehaviour
             moveForce = 65f;
             anim.SetBool("Crouch", true);   // 앉음 애니메이션 재생을 위함
         }
-        if (!Input.GetKey(KeyCode.DownArrow) && !isJump)
+        if (!Input.GetKey(KeyCode.DownArrow) && isGround)
         {
             // 레이캐스트가 닿았을 때 앉은 상태를 유지하도록
             if (rayHit && isCrouch)
@@ -417,7 +414,6 @@ public class Player_Controller : MonoBehaviour
     public void ResetController()
     {
         isHit = false;
-        isJump = false;
         isCrouch = false;
         anim.SetBool("Crouch", false);
         anim.SetBool("Jump", false);
