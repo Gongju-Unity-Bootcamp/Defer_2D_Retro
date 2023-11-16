@@ -12,10 +12,12 @@ public class Player_Controller : MonoBehaviour
     public float moveForce = 100f;
     public float gravityForce = 20f;
     public float jumpForce = 70f;
-    public float wallSlideForce = 5f;
+    public float wallSlideForce = 1f;
     public float slidingForce = 15f;
+    public float knockbackForce = 40f;
 
     [Header("Bools")]
+    public bool isMove = false;
     public bool isJump = false;
     public bool isWallJump = false;
     public bool isWallSlide = false;
@@ -23,6 +25,7 @@ public class Player_Controller : MonoBehaviour
     public bool isCrouch = false;
     public bool isSliding = false;
     public bool isSlope = false;
+    public bool isHit = false;
 
     [Header("Layers")]
     public LayerMask wallLayer;
@@ -70,21 +73,24 @@ public class Player_Controller : MonoBehaviour
     void Update()
     {
         rb.AddForce(Vector3.down * gravityForce);   // 간단한 중력 구현
-        Move();
+        if (!isHit)
+        {
+            Move();
+            Jump();
+            Crouch();
+            Attack();
+            Sliding();
+        }
         GroundCheck();
-        Jump();
-        Crouch();
         SlopeCheck();
         WallSlide();
         WallJump();
-        Sliding();
-        Attack();
     }
 
     private void FixedUpdate()
     {
         // Move에서 계산된 값을 토대로 캐릭터를 이동시킴
-        if (!isWallJump)
+        if (!isWallJump && !isHit)
         {
             rb.AddForce(transform.right * moveVector * Time.fixedDeltaTime * 100f, ForceMode2D.Force);
         }
@@ -108,6 +114,15 @@ public class Player_Controller : MonoBehaviour
             transform.localScale = new Vector2(-5, transform.localScale.y);
         }
 
+        if (Mathf.Abs(inputX) >= 0.3f)
+        {
+            isMove = true;
+        }
+        else
+        {
+            isMove = false;
+        }
+
         anim.SetFloat("Move", Mathf.Abs(inputX));
     }
 
@@ -123,8 +138,14 @@ public class Player_Controller : MonoBehaviour
 
         if(colliders.Length > 0)
         {
-            isGround = true;
             anim.SetBool("isAir", false);
+            isGround = true;
+            isJump = false;
+
+            if (jumpTime >= 0)
+            {
+                jumpTime = 2;
+            }
         }
     }
 
@@ -176,7 +197,7 @@ public class Player_Controller : MonoBehaviour
     /// 벽 체크
     /// </summary>
     /// <returns>true 또는 false</returns>
-    public bool IsWall1()
+    public bool IsWall()
     {
         return Physics2D.OverlapCircle(wallCheck.position, 0.3f, wallLayer);
     }
@@ -186,7 +207,7 @@ public class Player_Controller : MonoBehaviour
     /// </summary>
     public void WallSlide()
     {
-        if(IsWall1() && !isGround && inputX != 0f)
+        if(IsWall() && !isGround && inputX != 0f)
         {
             isWallSlide = true;
             rb.velocity = new Vector3(rb.velocity.x, Mathf.Clamp(rb.velocity.y, -wallSlideForce, float.MaxValue));
@@ -264,6 +285,19 @@ public class Player_Controller : MonoBehaviour
         // 확인용 레이캐스트 그리기
         Debug.DrawRay(new Vector2(transform.position.x, transform.position.y + 1.25f), transform.up, Color.red);
 
+        // 공격 애니메이션이 재생 중일 시 앉는 키를 눌러도 계속 서있는 상태를 유지하도록
+        if ((anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Attack") || anim.GetCurrentAnimatorStateInfo(0).IsName("Player_Attack2")))
+        {
+            anim.SetBool("Crouch", false);
+            isCrouch = false;
+            bc.size = new Vector2(0.21f, 0.38f);
+            bc.offset = new Vector2(0, 0);
+            if (!isSlope)
+            {
+                moveForce = 100f;
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.DownArrow) && !isJump)
         {
             // isCrouch는 이 부분 다음에 true로 바뀌기 때문에 먼저 실행됨
@@ -275,7 +309,6 @@ public class Player_Controller : MonoBehaviour
             isCrouch = true;
             bc.size = new Vector2(0.21f, 0.3f);
             bc.offset = new Vector2(0, 0.02f);
-            transform.localScale = new Vector2(transform.localScale.x, transform.localScale.y);
             moveForce = 65f;
             anim.SetBool("Crouch", true);   // 앉음 애니메이션 재생을 위함
         }
@@ -287,7 +320,6 @@ public class Player_Controller : MonoBehaviour
                 anim.SetBool("Crouch", true);
                 bc.size = new Vector2(0.21f, 0.3f);
                 bc.offset = new Vector2(0, 0.02f);
-                transform.localScale = new Vector2(transform.localScale.x, transform.localScale.y);
                 if (!isSlope)
                 {
                     moveForce = 65f;
@@ -299,7 +331,6 @@ public class Player_Controller : MonoBehaviour
                 isCrouch = false;
                 bc.size = new Vector2(0.21f, 0.38f);
                 bc.offset = new Vector2(0, 0);
-                transform.localScale = new Vector2(transform.localScale.x, transform.localScale.y);
                 if (!isSlope)
                 {
                     moveForce = 100f;
@@ -347,7 +378,7 @@ public class Player_Controller : MonoBehaviour
     public void Attack()
     {
         // 평상 공격
-        if (Input.GetKeyDown(attackKey))
+        if (Input.GetKeyDown(attackKey) && !isMove)
         {
             anim.SetTrigger("Attack");  // 공격 애니메이션 재생을 위함
         }
@@ -380,37 +411,51 @@ public class Player_Controller : MonoBehaviour
         crouchAttackCollider.SetActive(true);
     }
 
+    /// <summary>
+    /// 컨트롤러 상태 초기화용 함수
+    /// </summary>
+    public void ResetController()
+    {
+        isHit = false;
+        isJump = false;
+        isCrouch = false;
+        anim.SetBool("Crouch", false);
+        anim.SetBool("Jump", false);
+        anim.SetBool("isAir", false);
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         float slopeForce = moveForce;
-
-        // 땅 또는 경사면에 닿을 경우 점프 횟수와 점프 상태, 점프 횟수를 초기화
-        if (collision.collider.CompareTag("Ground") || collision.collider.CompareTag("Slope"))
-        {
-            isJump = false;
-
-            if (jumpTime >= 0)
-            {
-                jumpTime = 2;
-            }
-        }
-        
-        // 벽에 닿을 경우 점프 횟수와 점프 상태만 초기화
-        if (collision.collider.CompareTag("Wall"))
-        {
-            isJump = false;
-
-            if (jumpTime >= 0)
-            {
-                jumpTime = 2;
-            }
-        }
 
         // 경사면에 닿을 경우. 경사면 위에서만 이동 속도 증가
         if (collision.collider.CompareTag("Slope"))
         {
             isSlope = true;
             moveForce = slopeForce * 2f;
+        }
+
+        // 몬스터에게 닿을 경우 피격
+        if (collision.collider.CompareTag("Monster"))
+        {
+            // 앉은 자세일 경우 박스콜라이더 크기와 오프셋 원상 복구
+            if (isCrouch)
+            {
+                bc.size = new Vector2(0.21f, 0.38f);
+                bc.offset = new Vector2(0, 0);
+            }
+            anim.SetTrigger("isHit");
+            anim.SetFloat("Move", 0f);
+            isHit = true;
+
+            // 피격 시 넉백
+            Vector2 difference = (transform.position - collision.transform.position).normalized;
+            Vector2 force = difference * knockbackForce;
+            rb.AddForce(force, ForceMode2D.Impulse);
+
+            Invoke(nameof(ResetController), 0.5f);
+
+            Debug.Log("Hurt");
         }
     }
 

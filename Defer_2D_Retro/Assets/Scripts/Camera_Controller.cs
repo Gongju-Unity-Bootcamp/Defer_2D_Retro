@@ -15,7 +15,7 @@ public class Camera_Controller : MonoBehaviour
     public float offsetZ = 0;
 
     [Header("Speed")]
-    public float cameraSpeed = 5.0f;
+    public float cameraSpeed = 8.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -30,7 +30,7 @@ public class Camera_Controller : MonoBehaviour
     void FixedUpdate()
     {
         // 카메라의 위치 = 플레이어의 위치 좌표 + 오프셋
-        targetVector = new Vector3(player.position.x + offsetX, player.position.y + 2.5f + offsetY, -15f + offsetZ);
+        targetVector = new Vector3(player.position.x + offsetX, player.position.y + 2.5f + offsetY, -10f + offsetZ);
 
         // 카메라의 위치를 targetVector로 부드럽게 이동
         transform.position = Vector3.Lerp(transform.position, targetVector, Time.deltaTime * cameraSpeed);
@@ -43,31 +43,34 @@ public class Camera_Controller : MonoBehaviour
     /// </summary>
     public void OffsetCtrl()
     {
-        if (Input.GetKey(KeyCode.LeftArrow))
+        if (!PC.isHit)
         {
-            offsetX = -5;
-        }
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            offsetX = 5;
-        }
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                offsetX = -5;
+            }
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
+                offsetX = 5;
+            }
 
-        if (Input.GetKey(KeyCode.UpArrow))
-        {
-            offsetY = 3f;
-        }
-        else
-        {
-            offsetY = 0;
-        }
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                offsetY = 3f;
+            }
+            else
+            {
+                offsetY = 0;
+            }
 
-        if ((Input.GetKey(KeyCode.DownArrow) || PC.isCrouch) && PC.isGround)
-        {
-            offsetZ = 5f;
-        }
-        else
-        {
-            offsetZ = 0;
+            if (Input.GetKey(KeyCode.DownArrow) && PC.isCrouch)
+            {
+                offsetZ = 2.5f;
+            }
+            else
+            {
+                offsetZ = 0;
+            }
         }
     }
 }
