@@ -34,12 +34,6 @@ public class Player_Health : MonoBehaviour
         UpdateHealth();
         UpdateHealthText(currentHealth, maxHealth);
         CheckHealth();
-
-        if (Input.GetKeyUp(KeyCode.T))
-        {
-            SetHealth(maxHealth);
-            fillImage.color = gradient.Evaluate(healthSlider.normalizedValue);
-        }
     }
 
     /// <summary>

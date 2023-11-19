@@ -35,11 +35,6 @@ public class Monster_Health : MonoBehaviour
     {
         UpdateHealth();
         CheckHealth();
-
-        if (Input.GetKeyUp(KeyCode.T))
-        {
-            SetHealth(maxHealth);
-        }
     }
 
     private void LateUpdate()
