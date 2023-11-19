@@ -7,6 +7,7 @@ public class Camera_Controller : MonoBehaviour
     [Header("Player")]
     public Transform player;
     public Player_Controller PC;
+    public Player_Health PH;
 
     [Header("Offsets")]
     public Vector3 targetVector;
@@ -22,6 +23,7 @@ public class Camera_Controller : MonoBehaviour
     {
         // 플레이어의 앉음 여부를 가져오기 위함
         PC = FindObjectOfType<Player_Controller>();
+        PH = FindObjectOfType<Player_Health>();
     }
 
     // Update는 매 프레임마다 호출
@@ -29,13 +31,16 @@ public class Camera_Controller : MonoBehaviour
     // 불규칙한 Update와 달리 일정하게 호출됨
     void FixedUpdate()
     {
-        // 카메라의 위치 = 플레이어의 위치 좌표 + 오프셋
-        targetVector = new Vector3(player.position.x + offsetX, player.position.y + 2.5f + offsetY, -10f + offsetZ);
+        if (!PH.isDead)
+        {
+            // 카메라의 위치 = 플레이어의 위치 좌표 + 오프셋
+            targetVector = new Vector3(player.position.x + offsetX, player.position.y + 2.5f + offsetY, -10f + offsetZ);
 
-        // 카메라의 위치를 targetVector로 부드럽게 이동
-        transform.position = Vector3.Lerp(transform.position, targetVector, Time.deltaTime * cameraSpeed);
+            // 카메라의 위치를 targetVector로 부드럽게 이동
+            transform.position = Vector3.Lerp(transform.position, targetVector, Time.deltaTime * cameraSpeed);
 
-        OffsetCtrl();
+            OffsetCtrl();
+        }
     }
 
     /// <summary>
