@@ -197,7 +197,7 @@ public class Player_Controller : MonoBehaviour
         Debug.DrawRay(front, new Vector3(0, -0.5f, 0), Color.red);
         Debug.DrawRay(back, new Vector3(0, -0.5f, 0), Color.red);
 
-        // Check if the ray hits the slopeLayer
+        // 레이캐스트가 경사면에 맞았는지 체크
         if (frontHit.collider != null && backHit.collider != null)
         {
             Vector3 frontPos = frontHit.point;

@@ -15,13 +15,16 @@ public class Monster_Controller : MonoBehaviour
 
     [Header("Trace")]
     public float distanceToPlayer;
-    public float traceDistance;
-    public float moveSpeed = 20f;
+    public float traceDistance = 10f;
+    public float moveSpeed = 30f;
 
     [Header("Patrol")]
     public Vector3 startPosition;   // 시작 위치
     public float distanceToOrigin;
-    public float patrolRange = 5f;
+    public float patrolRange = 8f;
+    public float patrolTime = 2f; // 멈춰 있는 시간
+    public float currentPatrolTime = 0f;
+    public Vector3 randomPatrolPosition;
 
     [Header("Jump")]
     public Transform wallCheck;
@@ -30,6 +33,7 @@ public class Monster_Controller : MonoBehaviour
     [Header("Bools")]
     public bool isTrace = false;
     public bool isPatrol = false;
+    public bool isAttack = false;
 
     [Header("Layers")]
     public LayerMask groundLayer;
@@ -51,8 +55,21 @@ public class Monster_Controller : MonoBehaviour
     void Update()
     {
         rb.AddForce(Vector3.down * 20f);   // 간단한 중력 구현
-        Patrol();
-        Trace(traceDistance);
+
+        Attack();
+
+        // 공격중이 아닐때 + 피격 상태가 아닐때
+        if (!isAttack && !MH.isHit)
+        {
+            // 추적 중이 아닐 때만 순찰 실행
+            if (!isTrace)
+            {
+                Patrol();
+            }
+
+            Trace(traceDistance);
+        }
+
         Jump();
         SlopeCheck();
     }
@@ -71,7 +88,7 @@ public class Monster_Controller : MonoBehaviour
         Debug.DrawRay(front, new Vector3(0, -0.5f, 0), Color.red);
         Debug.DrawRay(back, new Vector3(0, -0.5f, 0), Color.red);
 
-        // Check if the ray hits the slopeLayer
+        // 레이캐스트가 경사면에 맞았는지 체크
         if (frontHit.collider != null && backHit.collider != null)
         {
             Vector3 frontPos = frontHit.point;
@@ -107,13 +124,7 @@ public class Monster_Controller : MonoBehaviour
             // 바라보는 방향 설정(로컬 스케일 x 조정)
             SetDirection(movement, 1);
 
-            // 피격 상태가 아닐때만 추적
-            if (!MH.isHit)
-            {
-                // ReturnToBase의 Invoke 실행을 취소
-                CancelInvoke(nameof(ReturnToBase));
-                transform.position += movement * moveSpeed * Time.deltaTime;
-            }
+            transform.position += movement * moveSpeed * Time.deltaTime;
         }
     }
 
@@ -122,22 +133,41 @@ public class Monster_Controller : MonoBehaviour
     /// </summary>
     public void Patrol()
     {
-        // 초기 위치와 현재 위치 사이의 거리(float)
+        // 자신과 플레이어 사이의 거리 계산(float)
         distanceToOrigin = Vector2.Distance(transform.position, startPosition);
 
-        // 초기 위치와 현재 위치 사이의 거리(Vector2)
-        Vector2 movement = -(transform.position - startPosition).normalized * moveSpeed * Time.deltaTime;
-        movement.y = 0;
+        if (!isPatrol)
+        {
+            // 무작위 위치 생성
+            randomPatrolPosition = new Vector3(Random.Range(-patrolRange, patrolRange), 0f, 0f);
+
+            isPatrol = true;
+        }
 
         // 바라보는 방향 설정(로컬 스케일 x 조정)
-        SetDirection(movement, 1);
+        SetDirection(randomPatrolPosition, 1);
 
-        if (!isTrace)
+        // 목표 위치까지 이동
+        transform.position = Vector3.MoveTowards(transform.position, startPosition + randomPatrolPosition, (moveSpeed / 10) * Time.deltaTime);
+
+        // 벽체크. 이동중 앞에 벽이 있을경우 위치를 다시 설정
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(wallCheck.position, 0.5f, groundLayer);
+
+        if (colliders.Length > 0)
         {
-            if(distanceToOrigin > 1f)
+            randomPatrolPosition = new Vector3(Random.Range(-patrolRange, patrolRange), 0f, 0f);
+        }
+
+        // 목표 위치에 도달했을 때
+        if (Vector3.Distance(transform.position, startPosition + randomPatrolPosition) < 0.1f)
+        {
+            currentPatrolTime += Time.deltaTime;
+
+            // 일정 시간 정지
+            if (currentPatrolTime >= patrolTime)
             {
-                // 5초뒤 ReturnToBase 실행
-                Invoke(nameof(ReturnToBase), 5f);
+                currentPatrolTime = 0f;
+                isPatrol = false;
             }
         }
     }
@@ -155,18 +185,6 @@ public class Monster_Controller : MonoBehaviour
         }
     }
 
-
-    /// <summary>
-    /// 시작 위치로 복귀하도록 만드는 함수
-    /// </summary>
-    public void ReturnToBase()
-    {
-        Vector3 movement = -(transform.position - startPosition).normalized * moveSpeed * Time.deltaTime;
-        movement.y = 0;
-
-        transform.position += movement * moveSpeed * Time.deltaTime;
-    }
-
     /// <summary>
     /// 방향을 설정하는 함수, scale은 스프라이트의 기본 크기에 맞게 설정
     /// </summary>
@@ -179,9 +197,26 @@ public class Monster_Controller : MonoBehaviour
         {
             transform.localScale = new Vector2(-scale, transform.localScale.y);
         }
-        if (dir.x > 0)
+        else if (dir.x > 0)
         {
             transform.localScale = new Vector2(scale, transform.localScale.y);
+        }
+    }
+
+    /// <summary>
+    /// 플레이어와의 거리가 가까울 경우 공격을 활성화하는 함수.
+    /// </summary>
+    public void Attack()
+    {
+        distanceToPlayer = Vector3.Distance(transform.position, PC.transform.position);
+
+        if (distanceToPlayer <= 2f)
+        {
+            isAttack = true;
+        }
+        else
+        {
+            isAttack = false;
         }
     }
 

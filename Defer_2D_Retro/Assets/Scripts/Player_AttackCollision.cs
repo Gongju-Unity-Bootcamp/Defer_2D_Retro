@@ -7,7 +7,7 @@ public class Player_AttackCollision : MonoBehaviour
     public Player_Controller PC;
 
     [Header("Force")]
-    public float knockbackForce = 8f; // 넉백 힘의 강도
+    public float knockbackForce = 15f; // 넉백 힘의 강도
 
     private void Awake()
     {
