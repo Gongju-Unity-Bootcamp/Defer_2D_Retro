@@ -33,6 +33,7 @@ public class Monster_Controller : MonoBehaviour
 
     [Header("Layers")]
     public LayerMask groundLayer;
+    public LayerMask slopeLayer;
 
     // Start is called before the first frame update
     void Start()
@@ -53,6 +54,34 @@ public class Monster_Controller : MonoBehaviour
         Patrol();
         Trace(traceDistance);
         Jump();
+        SlopeCheck();
+    }
+
+    /// <summary>
+    /// 경사면에 올라설 경우, 그 각도에 따라 캐릭터의 회전값이 변하도록 하는 함수
+    /// </summary>
+    public void SlopeCheck()
+    {
+        Vector3 front = new Vector3(transform.position.x + 1f, transform.position.y, 0);
+        Vector3 back = new Vector3(transform.position.x - 1f, transform.position.y, 0);
+
+        RaycastHit2D frontHit = Physics2D.Raycast(front, new Vector2(0, -1), Mathf.Infinity, slopeLayer);
+        RaycastHit2D backHit = Physics2D.Raycast(back, new Vector2(0, -1), Mathf.Infinity, slopeLayer);
+
+        Debug.DrawRay(front, new Vector3(0, -0.5f, 0), Color.red);
+        Debug.DrawRay(back, new Vector3(0, -0.5f, 0), Color.red);
+
+        // Check if the ray hits the slopeLayer
+        if (frontHit.collider != null && backHit.collider != null)
+        {
+            Vector3 frontPos = frontHit.point;
+            Vector3 backPos = backHit.point;
+            Vector3 lookDir = frontPos - backPos;
+            float SlopeAngle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg;
+
+            Quaternion charRotation = Quaternion.Euler(0, 0, SlopeAngle);
+            this.transform.rotation = charRotation;
+        }
     }
 
     /// <summary>
@@ -156,8 +185,28 @@ public class Monster_Controller : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        
+        float slopeForce = moveSpeed;
+
+        // 경사면에 닿을 경우. 경사면 위에서만 이동 속도 증가
+        if (collision.collider.CompareTag("Slope"))
+        {
+            moveSpeed = slopeForce * 2f;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        float slopeForce = moveSpeed;
+
+        if (collision.collider.CompareTag("Slope"))
+        {
+
+            if (moveSpeed > 20)
+            {
+                moveSpeed = slopeForce / 2f;
+            }
+        }
     }
 }
