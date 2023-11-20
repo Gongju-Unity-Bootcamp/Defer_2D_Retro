@@ -452,7 +452,7 @@ public class Player_Controller : MonoBehaviour
         }
 
         // 몬스터에게 닿을 경우 피격
-        if (collision.collider.CompareTag("Monster"))
+        if (collision.collider.CompareTag("Monster") && !PH.isDead)
         {
             // 데미지 10(임시)
             PH.TakeDamage(10);
