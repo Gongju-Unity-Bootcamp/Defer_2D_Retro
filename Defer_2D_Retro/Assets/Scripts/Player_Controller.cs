@@ -8,6 +8,9 @@ public class Player_Controller : MonoBehaviour
     public KeyCode jumpKey = KeyCode.Z; // 점프키 설정
     public KeyCode attackKey = KeyCode.X;   // 공격 키 설정
 
+    [Header("Player")]
+    public Player_Health PH;
+
     [Header("Forces")]
     public float moveForce = 100f;
     public float gravityForce = 20f;
@@ -25,6 +28,7 @@ public class Player_Controller : MonoBehaviour
     public bool isSliding = false;
     public bool isSlope = false;
     public bool isHit = false;
+    public bool isDead = false;
 
     [Header("Layers")]
     public LayerMask wallLayer;
@@ -66,33 +70,49 @@ public class Player_Controller : MonoBehaviour
         bc = GetComponent<BoxCollider2D>();
         sr = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
+        PH = GetComponent<Player_Health>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        rb.AddForce(Vector3.down * gravityForce);   // 간단한 중력 구현
-        if (!isHit)
+        if (!isDead)
         {
-            Move();
-            Jump();
-            Crouch();
-            Attack();
-            Sliding();
+            rb.AddForce(Vector3.down * gravityForce);   // 간단한 중력 구현
+            if (!isHit)
+            {
+                Move();
+                Jump();
+                Crouch();
+                Attack();
+                Sliding();
+            }
+            GroundCheck();
+            SlopeCheck();
+            WallSlide();
+            WallJump();
         }
-        GroundCheck();
-        SlopeCheck();
-        WallSlide();
-        WallJump();
+
     }
 
     private void FixedUpdate()
     {
         // Move에서 계산된 값을 토대로 캐릭터를 이동시킴
-        if (!isWallJump && !isHit)
+        if (!isWallJump && !isHit && !isDead)
         {
             rb.AddForce(transform.right * moveVector * Time.fixedDeltaTime * 100f, ForceMode2D.Force);
         }
+
+        DeadCheck();
+    }
+
+    /// <summary>
+    /// 사망 상태를 체크하는 함수
+    /// </summary>
+    private void DeadCheck()
+    {
+        isDead = PH.isDead;
+        anim.SetBool("isDead", isDead);
     }
 
     /// <summary>
@@ -434,6 +454,9 @@ public class Player_Controller : MonoBehaviour
         // 몬스터에게 닿을 경우 피격
         if (collision.collider.CompareTag("Monster"))
         {
+            // 데미지 10(임시)
+            PH.TakeDamage(10);
+
             // 앉은 자세일 경우 박스콜라이더 크기와 오프셋 원상 복구
             if (isCrouch)
             {

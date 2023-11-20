@@ -17,20 +17,20 @@ public class Particle_Controller : MonoBehaviour
 
     [Header("ETC")]
     public Rigidbody2D rb;
-    public Player_Controller pc;
+    public Player_Controller PC;
 
     public float counter;
 
     private void Start()
     {
-        pc = FindObjectOfType<Player_Controller>();
+        PC = FindObjectOfType<Player_Controller>();
     }
 
     private void Update()
     {
         counter += Time.deltaTime;
 
-        if(pc.isSliding && pc.isGround && pc.isCrouch && Mathf.Abs(rb.velocity.x) > occurAfterVelocity)
+        if(PC.isSliding && PC.isGround && PC.isCrouch && Mathf.Abs(rb.velocity.x) > occurAfterVelocity)
         {
             if(counter > dustFormationPeriod)
             {
@@ -42,7 +42,7 @@ public class Particle_Controller : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if ((collision.CompareTag("Ground") || collision.CompareTag("Slope")) && pc.isGround)
+        if ((collision.CompareTag("Ground") || collision.CompareTag("Slope") || collision.CompareTag("Wall")) && PC.isGround)
         {
             jumpParticle.Play();
         }
@@ -50,7 +50,7 @@ public class Particle_Controller : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.CompareTag("Wall") && pc.isWallSlide)
+        if ((collision.CompareTag("Ground") || collision.CompareTag("Wall")) && PC.isWallSlide)
         {
             wallParticle.Play();
         }
