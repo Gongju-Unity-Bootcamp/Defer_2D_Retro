@@ -5,6 +5,9 @@ using static UnityEditor.PlayerSettings;
 
 public class Monster_Controller : MonoBehaviour
 {
+    [Header("Damage")]
+    public float damage;
+
     [Header("Monster")]
     public Monster_Health MH;
     public Rigidbody2D rb;
@@ -20,20 +23,30 @@ public class Monster_Controller : MonoBehaviour
 
     [Header("Patrol")]
     public Vector3 startPosition;   // 시작 위치
+    public Vector3 randomPatrolPosition;
+    public Vector3 prevPosition;
     public float distanceToOrigin;
     public float patrolRange = 8f;
     public float patrolTime = 2f; // 멈춰 있는 시간
     public float currentPatrolTime = 0f;
-    public Vector3 randomPatrolPosition;
 
     [Header("Jump")]
     public Transform wallCheck;
-    public float jumpForce = 1.5f;
+    public float jumpForce = 15f;
+    public float jumpTime = 1f;
 
     [Header("Bools")]
     public bool isTrace = false;
     public bool isPatrol = false;
+    public bool isPatrolStop = false;
     public bool isAttack = false;
+    public bool isHit = false;
+
+    [Header("Animation")]
+    public Animator anim;
+
+    [Header("Attack")]
+    public GameObject attackCollider;
 
     [Header("Layers")]
     public LayerMask groundLayer;
@@ -46,6 +59,7 @@ public class Monster_Controller : MonoBehaviour
         bc = GetComponent<BoxCollider2D>();
         PC = FindObjectOfType<Player_Controller>();
         MH = GetComponent<Monster_Health>();
+        anim = GetComponent<Animator>();
 
         // 초기 위치 저장
         startPosition = transform.position;
@@ -55,23 +69,68 @@ public class Monster_Controller : MonoBehaviour
     void Update()
     {
         rb.AddForce(Vector3.down * 20f);   // 간단한 중력 구현
-
-        Attack();
-
-        // 공격중이 아닐때 + 피격 상태가 아닐때
-        if (!isAttack && !MH.isHit)
+        if (!MH.isDead)
         {
-            // 추적 중이 아닐 때만 순찰 실행
-            if (!isTrace)
+            Attack();
+
+            // 공격중이 아닐때 + 피격 상태가 아닐때 + 공격 애니메이션 재생중이 아닐때
+            if (!isAttack && !MH.isHit && !anim.GetCurrentAnimatorStateInfo(0).IsName("Monster_Attack") && !isHit)
             {
-                Patrol();
+                // 추적 중이 아닐 때만 순찰 실행
+                if (!isTrace)
+                {
+                    Patrol();
+                }
+
+                Trace(traceDistance);
             }
 
-            Trace(traceDistance);
+            Jump();
+            SlopeCheck();
+        }
+        else if (MH.isDead)
+        {
+            Invoke(nameof(OnDead), 5f);
         }
 
-        Jump();
-        SlopeCheck();
+        AnimControl();
+    }
+
+    public void OnDead()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void AnimControl()
+    {
+        if (isTrace || isPatrolStop)
+        {
+            anim.SetBool("isMove", true);
+        }
+        else
+        {
+            anim.SetBool("isMove", false);
+        }
+
+        if (isAttack)
+        {
+            anim.SetBool("isAttack", true);
+        }
+        else
+        {
+            anim.SetBool("isAttack", false);
+        }
+
+        if (MH.isDead)
+        {
+            anim.SetBool("isDead", true);
+            anim.SetBool("isMove", false);
+            anim.SetBool("isAttack", false);
+        }
+        else
+        {
+            anim.SetBool("isDead", false);
+        }
     }
 
     /// <summary>
@@ -117,7 +176,7 @@ public class Monster_Controller : MonoBehaviour
         isTrace = false;
 
         // 플레이어와의 거리가 설정한 거리보다 작거나 같을 경우 추적 시작
-        if(distance >= distanceToPlayer)
+        if (distance >= distanceToPlayer)
         {
             isTrace = true;
 
@@ -133,19 +192,27 @@ public class Monster_Controller : MonoBehaviour
     /// </summary>
     public void Patrol()
     {
-        // 자신과 플레이어 사이의 거리 계산(float)
+        // 자신과 시작 위치 사이의 거리 계산(float)
         distanceToOrigin = Vector2.Distance(transform.position, startPosition);
+
+        if(Mathf.Abs(distanceToOrigin) > patrolRange)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, startPosition, (moveSpeed / 10) * Time.deltaTime);
+            SetDirection(startPosition, 1);
+        }
 
         if (!isPatrol)
         {
             // 무작위 위치 생성
             randomPatrolPosition = new Vector3(Random.Range(-patrolRange, patrolRange), 0f, 0f);
 
+            prevPosition = transform.position;
+
             isPatrol = true;
         }
 
         // 바라보는 방향 설정(로컬 스케일 x 조정)
-        SetDirection(randomPatrolPosition, 1);
+        SetPatrolDirection(prevPosition + randomPatrolPosition, prevPosition, 1);
 
         // 목표 위치까지 이동
         transform.position = Vector3.MoveTowards(transform.position, startPosition + randomPatrolPosition, (moveSpeed / 10) * Time.deltaTime);
@@ -163,12 +230,21 @@ public class Monster_Controller : MonoBehaviour
         {
             currentPatrolTime += Time.deltaTime;
 
-            // 일정 시간 정지
+            // 일정 움직임 정지
             if (currentPatrolTime >= patrolTime)
             {
                 currentPatrolTime = 0f;
                 isPatrol = false;
             }
+        }
+
+        if(currentPatrolTime != 0)
+        {
+            isPatrolStop = false;
+        }
+        else
+        {
+            isPatrolStop = true;
         }
     }
 
@@ -179,9 +255,10 @@ public class Monster_Controller : MonoBehaviour
     {
         Collider2D[] colliders = Physics2D.OverlapCircleAll(wallCheck.position, 0.5f, groundLayer);
 
-        if (colliders.Length > 0)
+        if (colliders.Length > 0 && jumpTime != 0f)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);
+            jumpTime--;
         }
     }
 
@@ -204,13 +281,31 @@ public class Monster_Controller : MonoBehaviour
     }
 
     /// <summary>
+    /// 방향을 설정하는 함수, scale은 스프라이트의 기본 크기에 맞게 설정
+    /// </summary>
+    /// <param name="dir"></param>
+    /// <param name="scale"></param>
+    public void SetPatrolDirection(Vector2 dir, Vector2 prev, float scale)
+    {
+        // 바라보는 방향 설정(로컬 스케일 x 조정)
+        if (dir.x < prev.x)
+        {
+            transform.localScale = new Vector2(-scale, transform.localScale.y);
+        }
+        else if (dir.x > prev.x)
+        {
+            transform.localScale = new Vector2(scale, transform.localScale.y);
+        }
+    }
+
+    /// <summary>
     /// 플레이어와의 거리가 가까울 경우 공격을 활성화하는 함수.
     /// </summary>
     public void Attack()
     {
         distanceToPlayer = Vector3.Distance(transform.position, PC.transform.position);
 
-        if (distanceToPlayer <= 2f)
+        if (distanceToPlayer <= 1.5f)
         {
             isAttack = true;
         }
@@ -220,9 +315,32 @@ public class Monster_Controller : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 애니메이션 속 이벤트에 적용되는 함수. 1타 공격에 사용
+    /// </summary>
+    public void OnAttackCollision()
+    {
+        // 공격 애니메이션에 이벤트로 넣어서 활성화
+        attackCollider.SetActive(true);
+    }
+
+    /// <summary>
+    /// 컨트롤러 상태 초기화용 함수
+    /// </summary>
+    public void ResetController()
+    {
+        isHit = false;
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         float slopeForce = moveSpeed;
+
+        // 땅에 닿을 경우.
+        if (collision.collider.CompareTag("Ground"))
+        {
+            jumpTime = 1f;
+        }
 
         // 경사면에 닿을 경우. 경사면 위에서만 이동 속도 증가
         if (collision.collider.CompareTag("Slope"))

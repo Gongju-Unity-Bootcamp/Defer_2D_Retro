@@ -38,14 +38,6 @@ public class Monster_Health : MonoBehaviour
         CheckHealth();
     }
 
-    private void LateUpdate()
-    {
-        if (isDead)
-        {
-            gameObject.SetActive(false);
-        }
-    }
-
     /// <summary>
     /// 체력을 체크하여 사망 상태를 결정하는 함수
     /// </summary>

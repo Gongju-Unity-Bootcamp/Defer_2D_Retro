@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Player_Controller : MonoBehaviour
 {
+    [Header("Damage")]
+    public float damage;
+
     [Header("Keys")]
     public KeyCode jumpKey = KeyCode.Z; // 점프키 설정
     public KeyCode attackKey = KeyCode.X;   // 공격 키 설정
@@ -452,10 +455,11 @@ public class Player_Controller : MonoBehaviour
         }
 
         // 몬스터에게 닿을 경우 피격
-        if (collision.collider.CompareTag("Monster") && !PH.isDead)
+        if (collision.collider.CompareTag("Monster") && !collision.collider.GetComponent<Monster_Health>().isDead && !PH.isDead)
         {
-            // 데미지 10(임시)
-            PH.TakeDamage(10);
+            // 부딪친 몬스터의 컴포넌트에서 데미지 값을 가져옴
+            // 객체별 데미지를 위한 설정
+            PH.TakeDamage(collision.collider.GetComponent<Monster_Controller>().damage);
 
             // 앉은 자세일 경우 박스콜라이더 크기와 오프셋 원상 복구
             if (isCrouch)
