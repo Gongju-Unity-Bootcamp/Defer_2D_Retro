@@ -616,7 +616,7 @@ MonoBehaviour:
   PC: {fileID: 0}
   distanceToPlayer: 0
   traceDistance: 10
-  moveSpeed: 30
+  moveSpeed: 15
   startPosition: {x: 0, y: 0, z: 0}
   randomPatrolPosition: {x: 0, y: 0, z: 0}
   prevPosition: {x: 0, y: 0, z: 0}
@@ -625,7 +625,7 @@ MonoBehaviour:
   patrolTime: 2
   currentPatrolTime: 0
   wallCheck: {fileID: 3242226810403609334}
-  jumpForce: 15
+  jumpForce: 10
   jumpTime: 1
   isTrace: 0
   isPatrol: 0

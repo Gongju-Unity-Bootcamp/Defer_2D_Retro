@@ -341,7 +341,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!61 &7805480263332502221
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -399,7 +399,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fa78d178b9230f4484cbf9c53e00bd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 150
   currentHealth: 0
   cg: {fileID: 1751413008460031990}
   healthSlider: {fileID: 461869179203616250}
@@ -419,14 +419,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64feb30b338ec1541bd98cab88233bcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 15
+  damage: 20
   MH: {fileID: 0}
   rb: {fileID: 0}
   bc: {fileID: 0}
   PC: {fileID: 0}
   distanceToPlayer: 0
   traceDistance: 10
-  moveSpeed: 30
+  moveSpeed: 12.5
   startPosition: {x: 0, y: 0, z: 0}
   randomPatrolPosition: {x: 0, y: 0, z: 0}
   prevPosition: {x: 0, y: 0, z: 0}
@@ -435,7 +435,7 @@ MonoBehaviour:
   patrolTime: 2
   currentPatrolTime: 0
   wallCheck: {fileID: 11700354818421088}
-  jumpForce: 15
+  jumpForce: 10
   jumpTime: 1
   isTrace: 0
   isPatrol: 0

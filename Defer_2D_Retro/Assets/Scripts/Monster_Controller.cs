@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 public class Monster_Controller : MonoBehaviour
 {
@@ -305,7 +304,7 @@ public class Monster_Controller : MonoBehaviour
     {
         distanceToPlayer = Vector3.Distance(transform.position, PC.transform.position);
 
-        if (distanceToPlayer <= 1.5f)
+        if (distanceToPlayer <= 1.75f)
         {
             isAttack = true;
         }
