@@ -89,17 +89,24 @@ public class Monster_Controller : MonoBehaviour
         }
         else if (MH.isDead)
         {
+            // 몬스터가 죽었을 경우 5초뒤 OnDead 실행(비활성화)
             Invoke(nameof(OnDead), 5f);
         }
 
         AnimControl();
     }
 
+    /// <summary>
+    /// 몬스터가 죽었을 때 비활성화 시키는 함수
+    /// </summary>
     public void OnDead()
     {
         gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// 각 애니메이션의 상태를 컨트롤 하는 함수
+    /// </summary>
     public void AnimControl()
     {
         if (isTrace || isPatrolStop)
@@ -205,6 +212,7 @@ public class Monster_Controller : MonoBehaviour
             // 무작위 위치 생성
             randomPatrolPosition = new Vector3(Random.Range(-patrolRange, patrolRange), 0f, 0f);
 
+            // 이전 위치 저장
             prevPosition = transform.position;
 
             isPatrol = true;
@@ -229,7 +237,7 @@ public class Monster_Controller : MonoBehaviour
         {
             currentPatrolTime += Time.deltaTime;
 
-            // 일정 움직임 정지
+            // 일정 시간 움직임 정지
             if (currentPatrolTime >= patrolTime)
             {
                 currentPatrolTime = 0f;

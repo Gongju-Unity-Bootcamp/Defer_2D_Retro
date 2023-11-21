@@ -119,7 +119,7 @@ public class Monster_Health : MonoBehaviour
 
     private IEnumerator DisableHealthBar()
     {
-        yield return new WaitForSeconds(2.5f); // 사망 애니메이션이 재생되는 동안 대기
+        yield return new WaitForSeconds(2.5f);
 
         cg.alpha = 0; // 체력바 숨김
     }
