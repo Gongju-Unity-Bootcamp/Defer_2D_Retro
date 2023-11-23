@@ -110,7 +110,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: idle2_0
+  m_Name: Boss_Reaper
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: isAttack
@@ -121,6 +121,18 @@ AnimatorController:
     m_Controller: {fileID: 0}
   - m_Name: isDead
     m_Type: 4
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: isSummon
+    m_Type: 9
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: isHollow
+    m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
@@ -145,7 +157,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Reaper_Skill
+  m_Name: Reaper_Hollow
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -230,16 +242,16 @@ AnimatorStateMachine:
     m_Position: {x: 30, y: 200, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -8646008334326126237}
-    m_Position: {x: 300, y: 120, z: 0}
+    m_Position: {x: 30, y: 310, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 5545214740146313464}
-    m_Position: {x: 300, y: 200, z: 0}
+    m_Position: {x: -220, y: 200, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 2447556643655183348}
-    m_Position: {x: 300, y: 30, z: 0}
+    m_Position: {x: 280, y: 310, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 4546072994501833372}
-    m_Position: {x: 560, y: 30, z: 0}
+    m_Position: {x: 280, y: 200, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []

@@ -480,6 +480,33 @@ public class Player_Controller : MonoBehaviour
 
             Debug.Log("Hurt");
         }
+
+        // 보스 몬스터에게 닿을 경우 피격
+        if (collision.collider.CompareTag("Boss") && /*!collision.gameObject.GetComponent<Boss_Health>().isDead &&*/ !PH.isDead)
+        {
+            // 부딪친 몬스터의 컴포넌트에서 데미지 값을 가져옴
+            // 객체별 데미지를 위한 설정
+            PH.TakeDamage(collision.collider.GetComponent<Boss_Controller>().damage);
+
+            // 앉은 자세일 경우 박스콜라이더 크기와 오프셋 원상 복구
+            if (isCrouch)
+            {
+                bc.size = new Vector2(0.21f, 0.38f);
+                bc.offset = new Vector2(0, 0);
+            }
+            anim.SetTrigger("isHit");
+            anim.SetFloat("Move", 0f);
+            isHit = true;
+
+            // 피격 시 넉백
+            Vector2 difference = (transform.position - collision.transform.position).normalized;
+            Vector2 force = difference * knockbackForce;
+            rb.AddForce(force, ForceMode2D.Impulse);
+
+            Invoke(nameof(ResetController), 0.5f);
+
+            Debug.Log("Hurt");
+        }
     }
 
     private void OnCollisionExit2D(Collision2D collision)

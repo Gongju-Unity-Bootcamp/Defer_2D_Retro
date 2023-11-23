@@ -62,10 +62,17 @@ public class Monster_AttackCollision : MonoBehaviour
             PC.anim.SetTrigger("isHit");
             PC.anim.SetFloat("Move", 0f);
             PC.isHit = true;
-            
+
             // 부모 오브젝트의 컴포넌트(Monster_Controller)에서 값을 가져옴
             // 객체별 데미지를 위한 설정
-            other.GetComponent<Player_Health>().TakeDamage(GetComponentInParent<Monster_Controller>().damage);
+            if (this.transform.parent.CompareTag("Monster"))
+            {
+                other.GetComponent<Player_Health>().TakeDamage(GetComponentInParent<Monster_Controller>().damage);
+            }
+            else if (this.transform.parent.CompareTag("Boss"))
+            {
+                other.GetComponent<Player_Health>().TakeDamage(GetComponentInParent<Boss_Controller>().damage);
+            }
 
             Vector2 force = difference * knockbackForce;
             other.GetComponent<Rigidbody2D>().AddForce(force, ForceMode2D.Impulse);

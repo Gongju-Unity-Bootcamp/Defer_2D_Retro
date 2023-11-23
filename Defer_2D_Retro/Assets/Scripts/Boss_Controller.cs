@@ -17,14 +17,22 @@ public class Boss_Controller : MonoBehaviour
 
     [Header("Trace")]
     public float distanceToPlayer;
-    public float moveSpeed = 10f;
+    public float moveSpeed = 30f;
 
     [Header("Bools")]
-    public bool isSkill = false;
     public bool isAttack = false;
+    public bool isSummon = false;
+    public bool isHollow = false;
 
     [Header("Attack")]
     public GameObject attackCollider;
+
+    [Header("Skill")]
+    public float summonCooldown = 10f; // 소환 스킬 쿨다운 시간
+    public float hollowCooldown = 15f; // 할로우 스킬 쿨다운 시간
+    public float randomTime;
+
+    private float nextSkillTime; // 다음 스킬 사용까지 남은 시간
 
     [Header("Animation")]
     public Animator anim;
@@ -48,6 +56,12 @@ public class Boss_Controller : MonoBehaviour
         }
         Attack();
         AnimControl();
+
+        // 랜덤으로 스킬 사용
+        if (Time.time > nextSkillTime)
+        {
+            UseRandomSkill();
+        }
     }
 
     /// <summary>
@@ -118,7 +132,7 @@ public class Boss_Controller : MonoBehaviour
     {
         distanceToPlayer = Vector3.Distance(transform.position, PC.transform.position);
 
-        if (distanceToPlayer <= 2.25f)
+        if (distanceToPlayer <= 2.5f)
         {
             isAttack = true;
         }
@@ -137,4 +151,55 @@ public class Boss_Controller : MonoBehaviour
         attackCollider.SetActive(true);
     }
 
+    /// <summary>
+    /// 랜덤으로 소환 스킬 또는 할로우 스킬을 선택하여 사용하는 함수
+    /// </summary>
+    public void UseRandomSkill()
+    {
+        // 0부터 1 사이의 랜덤한 값 생성
+        randomTime = Random.Range(0f, 1f);
+
+        // 0.5보다 작은 경우 소환 스킬 사용
+        if (randomTime < 0.5f)
+        {
+            SummonSkill();
+        }
+        else // 0.5 이상인 경우 할로우 스킬 사용
+        {
+            HollowSkill();
+        }
+
+        // 다음 스킬까지의 시간을 설정하고 쿨다운을 적용
+        nextSkillTime = Time.time + (randomTime < 0.5f ? summonCooldown : hollowCooldown);
+    }
+
+    /// <summary>
+    /// 소환 스킬
+    /// </summary>
+    public void SummonSkill()
+    {
+        // isSummon = true;
+
+        Debug.Log("Summon");
+    }
+
+    /// <summary>
+    /// 할로우(통과) 스킬
+    /// </summary>
+    public void HollowSkill()
+    {
+        // isHollow = true;
+
+        Debug.Log("Hollow");
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // isTrigger를 사용하지 않아도 벽을 통과할 수 있도록
+        // 플레이어가 아닐 경우에만
+        if (!collision.collider.CompareTag("Player"))
+        {
+            Physics2D.IgnoreCollision(collision.collider, GetComponent<Collider2D>());
+        }
+    }
 }

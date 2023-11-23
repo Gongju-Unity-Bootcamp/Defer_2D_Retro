@@ -8,6 +8,7 @@ TagManager:
   - Slope
   - Wall
   - Monster
+  - Boss
   layers:
   - Default
   - TransparentFX
