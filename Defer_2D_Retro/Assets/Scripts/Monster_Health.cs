@@ -18,6 +18,7 @@ public class Monster_Health : MonoBehaviour
 
     [Header("Bools")]
     public bool isDead = false;
+    public bool isHit = false;
 
     // Start is called before the first frame update
     void Start()
@@ -35,14 +36,6 @@ public class Monster_Health : MonoBehaviour
     {
         UpdateHealth();
         CheckHealth();
-    }
-
-    private void LateUpdate()
-    {
-        if (isDead)
-        {
-            gameObject.SetActive(false);
-        }
     }
 
     /// <summary>
@@ -96,12 +89,23 @@ public class Monster_Health : MonoBehaviour
             return; 
         }
 
-        StopCoroutine("Visible");
+        StopCoroutine(nameof(Visible));
+        StopCoroutine(nameof(SetHit));
 
-        StartCoroutine("Visible");
+        StartCoroutine(nameof(Visible));
+        StartCoroutine(nameof(SetHit));
 
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+    }
+
+    public IEnumerator SetHit()
+    {
+        isHit = true;
+
+        yield return new WaitForSeconds(1f);
+
+        isHit = false;
     }
 
     private IEnumerator Visible()
@@ -115,7 +119,7 @@ public class Monster_Health : MonoBehaviour
 
     private IEnumerator DisableHealthBar()
     {
-        yield return new WaitForSeconds(2.5f); // 사망 애니메이션이 재생되는 동안 대기
+        yield return new WaitForSeconds(2.5f);
 
         cg.alpha = 0; // 체력바 숨김
     }

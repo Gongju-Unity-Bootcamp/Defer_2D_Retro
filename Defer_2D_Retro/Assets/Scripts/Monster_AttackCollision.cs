@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class Player_AttackCollision : MonoBehaviour
+public class Monster_AttackCollision : MonoBehaviour
 {
-    [Header("Player")]
-    public Player_Controller PC;
-
     [Header("Monster")]
     public Monster_Controller MC;
+
+    [Header("Player")]
+    public Player_Controller PC;
 
     [Header("Force")]
     public float knockbackForce = 15f; // 넉백 힘의 강도
@@ -26,19 +26,19 @@ public class Player_AttackCollision : MonoBehaviour
 
 	private void OnTriggerEnter2D(Collider2D other)
     {
-		if (other.CompareTag("Monster") && !other.GetComponent<Monster_Health>().isDead)
+		if (other.CompareTag("Player") && !other.GetComponent<Player_Health>().isDead)
 		{
-            // 플레이어와 몬스터간의 거리
+            // 몬스터와 플레이어간의 거리
             // 이걸 사용하지 않고 가까이서 공격 시 넉백을 플레이어 방향으로 하기 때문에 계산
             Vector2 distance = new Vector2(transform.position.x - other.transform.position.x,
                 transform.position.y - other.transform.position.y).normalized;
             Vector2 difference;
 
-            // 플레이어의 로컬 스케일로 플레이어가 바라보는 방향을 결정
+            // 몬스터의 로컬 스케일로 몬스터가 바라보는 방향을 결정
             // 거리가 가까울 경우(0보다 작을 경우) 밀려나게, 아닐 경우 평소대로
-            if (PC.transform.localScale.x > 0)
+            if (MC.transform.localScale.x > 0)
             {
-                if (distance.x < 0)
+                if (distance.x < 0 )
                 {
                     difference = -(transform.position - other.transform.position).normalized;
                 }
@@ -59,19 +59,18 @@ public class Player_AttackCollision : MonoBehaviour
                 }
             }
 
-            // 피격받은 몬스터에게만 적용하기 위해
-            other.GetComponent<Monster_Controller>().anim.SetTrigger("isHit");
-            other.GetComponent<Monster_Controller>().isHit = true;
-
-            // Player_Controller에서 데미지 값을 가져옴
-            // 이후에 인게임에서 이벤트 등으로 데미지 증가 가능
-            other.GetComponent<Monster_Health>().TakeDamage(PC.damage);
+            PC.anim.SetTrigger("isHit");
+            PC.anim.SetFloat("Move", 0f);
+            PC.isHit = true;
+            
+            // 부모 오브젝트의 컴포넌트(Monster_Controller)에서 값을 가져옴
+            // 객체별 데미지를 위한 설정
+            other.GetComponent<Player_Health>().TakeDamage(GetComponentInParent<Monster_Controller>().damage);
 
             Vector2 force = difference * knockbackForce;
             other.GetComponent<Rigidbody2D>().AddForce(force, ForceMode2D.Impulse);
 
-            // 피격받은 몬스터에게만 적용하기 위해
-            other.GetComponent<Monster_Controller>().Invoke(nameof(MC.ResetController), 0.5f);
+            PC.Invoke(nameof(PC.ResetController), 0.5f);
 
             Debug.Log("HIT");
         }

@@ -13,7 +13,7 @@ public class Particle_Controller : MonoBehaviour
     [Range(0, 10)]
     public int occurAfterVelocity;
     [Range(0, 0.2f)]
-    public float dustFormationPeriod;
+    public float dustFormationPeriod;   // 파티클이 연속해서 발생하지 않도록 일정한 시간 간격을 두기 위함
 
     [Header("ETC")]
     public Rigidbody2D rb;
@@ -28,11 +28,22 @@ public class Particle_Controller : MonoBehaviour
 
     private void Update()
     {
+        HandleSlideParticle();
+    }
+
+    /// <summary>
+    /// 슬라이딩 파티클을 컨트롤하는 함수
+    /// </summary>
+    public void HandleSlideParticle()
+    {
+        // 시간에 따른 카운터 증가
         counter += Time.deltaTime;
 
-        if(PC.isSliding && PC.isGround && PC.isCrouch && Mathf.Abs(rb.velocity.x) > occurAfterVelocity)
+        // 플레이어가 슬라이딩 중이고, 땅에 닿아있고, 앉아있는 상태이며, x축 속도가 지정된 값보다 큰 경우
+        if (PC.isSliding && PC.isGround && PC.isCrouch && Mathf.Abs(rb.velocity.x) > occurAfterVelocity)
         {
-            if(counter > dustFormationPeriod)
+            // 지정된 시간 간격(dustFormationPeriod)마다 파티클을 재생
+            if (counter > dustFormationPeriod)
             {
                 slidingParticle.Play();
                 counter = 0;
@@ -42,6 +53,7 @@ public class Particle_Controller : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
+        // 점프할 때 땅이나 경사, 벽에 닿은 상태 + isGround가 true 일 경우 점프 파티클 재생
         if ((collision.CompareTag("Ground") || collision.CompareTag("Slope") || collision.CompareTag("Wall")) && PC.isGround)
         {
             jumpParticle.Play();
@@ -50,6 +62,7 @@ public class Particle_Controller : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
+        // 땅 또는 벽에 닿아있고 isWallSlide가 true 일 경우 벽 파티클 재생
         if ((collision.CompareTag("Ground") || collision.CompareTag("Wall")) && PC.isWallSlide)
         {
             wallParticle.Play();
