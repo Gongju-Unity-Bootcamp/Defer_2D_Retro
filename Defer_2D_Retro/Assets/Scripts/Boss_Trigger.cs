@@ -22,6 +22,7 @@ public class Boss_Trigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        // 트리거(Boss Area)에 플레이어가 들어올 시 보스를 소환, 해당 영역은 제거
         if (collision.gameObject.CompareTag("Player"))
         {
             Instantiate(boss, spawnPoint.position, spawnPoint.rotation);
