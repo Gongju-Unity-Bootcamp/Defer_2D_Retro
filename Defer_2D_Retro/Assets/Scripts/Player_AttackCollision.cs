@@ -9,12 +9,16 @@ public class Player_AttackCollision : MonoBehaviour
     [Header("Monster")]
     public Monster_Controller MC;
 
+    [Header("Boss")]
+    public Boss_Controller BC;
+
     [Header("Force")]
     public float knockbackForce = 15f; // 넉백 힘의 강도
 
     private void Awake()
     {
         MC = FindObjectOfType<Monster_Controller>();
+        BC = FindObjectOfType<Boss_Controller>();
         PC = FindObjectOfType<Player_Controller>();
     }
 
@@ -75,7 +79,29 @@ public class Player_AttackCollision : MonoBehaviour
 
             Debug.Log("HIT");
         }
-	}
+
+        if (other.CompareTag("Summons") && !other.GetComponent<Monster_Health>().isDead)
+        {
+            // Player_Controller에서 데미지 값을 가져옴
+            // 이후에 인게임에서 이벤트 등으로 데미지 증가 가능
+            other.GetComponent<Monster_Health>().TakeDamage(PC.damage);
+
+            Debug.Log("HIT");
+        }
+
+        if (other.CompareTag("Boss") && !other.GetComponent<Monster_Health>().isDead)
+        {
+            // 피격받은 몬스터에게만 적용하기 위해
+            other.GetComponent<Boss_Controller>().isHit = true;
+
+            // Player_Controller에서 데미지 값을 가져옴
+            // 이후에 인게임에서 이벤트 등으로 데미지 증가 가능
+            other.GetComponent<Monster_Health>().TakeDamage(PC.damage);
+
+            // 피격받은 몬스터에게만 적용하기 위해
+            other.GetComponent<Boss_Controller>().Invoke(nameof(BC.ResetController), 0.5f);
+        }
+    }
 
 
     /// 0.05초 후에 오브젝트가 비활성화 되도록 한다

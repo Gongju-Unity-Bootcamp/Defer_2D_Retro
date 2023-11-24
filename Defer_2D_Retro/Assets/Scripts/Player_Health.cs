@@ -37,11 +37,11 @@ public class Player_Health : MonoBehaviour
     }
 
     /// <summary>
-    /// 체력을 체크하여 사망 상태를 결정하는 함수
+    /// 체력을 체크하여 사망 상태를 결정하는 함수. 위치가 y -15일 경우에도 사망
     /// </summary>
     public void CheckHealth()
     {
-        if(currentHealth == 0)
+        if(currentHealth == 0 || transform.position.y <= -15f)
         {
             isDead = true;
         }

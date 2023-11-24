@@ -8,6 +8,9 @@ TagManager:
   - Slope
   - Wall
   - Monster
+  - Boss
+  - Summons
+  - BossArea
   layers:
   - Default
   - TransparentFX
