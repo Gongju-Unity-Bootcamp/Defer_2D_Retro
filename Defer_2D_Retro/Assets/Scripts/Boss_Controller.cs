@@ -23,16 +23,21 @@ public class Boss_Controller : MonoBehaviour
     public bool isAttack = false;
     public bool isSummon = false;
     public bool isHollow = false;
+    public bool isHit = false;
 
     [Header("Attack")]
     public GameObject attackCollider;
 
     [Header("Skill")]
-    public float summonCooldown = 10f; // 소환 스킬 쿨다운 시간
+    public float summonCooldown = 20f; // 소환 스킬 쿨다운 시간
     public float hollowCooldown = 15f; // 할로우 스킬 쿨다운 시간
     public float randomTime;
-
     private float nextSkillTime; // 다음 스킬 사용까지 남은 시간
+
+    [Header("Summons")]
+    public int summonTime = 0;
+    public GameObject summons;
+    public Transform summonPosition;
 
     [Header("Animation")]
     public Animator anim;
@@ -50,18 +55,41 @@ public class Boss_Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isAttack && !anim.GetCurrentAnimatorStateInfo(0).IsName("Monster_Attack"))
+        if (!MH.isDead)
         {
-            Trace();
-        }
-        Attack();
-        AnimControl();
+            // 공격 중이 아닐때(공격 애니메이션 재생중이 아닐때)
+            // 보스가 생성되는 중이 아닐때
+            // 소환 스킬을 쓰는 중이 아닐때
+            if (!isAttack && 
+                !anim.GetCurrentAnimatorStateInfo(0).IsName("Monster_Attack") && 
+                !anim.GetCurrentAnimatorStateInfo(0).IsName("Reaper_Appear") && 
+                !anim.GetCurrentAnimatorStateInfo(0).IsName("Reaper_Summon"))
+            {
+                Trace();
 
-        // 랜덤으로 스킬 사용
-        if (Time.time > nextSkillTime)
-        {
-            UseRandomSkill();
+                // 랜덤으로 스킬 사용
+                if (Time.time > nextSkillTime)
+                {
+                    UseRandomSkill();
+                }
+            }
+            Attack();
+            GetHit();
         }
+        else if (MH.isDead)
+        {
+            // 몬스터가 죽었을 경우 1.5초뒤 OnDead 실행(비활성화)
+            Invoke(nameof(OnDead), 1.5f);
+        }
+        AnimControl();
+    }
+
+    /// <summary>
+    /// 몬스터가 죽었을 때 비활성화 시키는 함수
+    /// </summary>
+    public void OnDead()
+    {
+        gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -69,6 +97,7 @@ public class Boss_Controller : MonoBehaviour
     /// </summary>
     public void AnimControl()
     {
+
         if (isAttack)
         {
             anim.SetBool("isAttack", true);
@@ -78,16 +107,27 @@ public class Boss_Controller : MonoBehaviour
             anim.SetBool("isAttack", false);
         }
 
-        /*if (MH.isDead)
+        if (isSummon)
+        {
+            anim.SetTrigger("isSummon");
+            isSummon = false;
+        }
+
+        if (isHollow)
+        {
+            anim.SetTrigger("isHollow");
+            isHollow = false;
+        }
+
+        if (MH.isDead)
         {
             anim.SetBool("isDead", true);
-            anim.SetBool("isMove", false);
             anim.SetBool("isAttack", false);
         }
         else
         {
             anim.SetBool("isDead", false);
-        }*/
+        }
     }
 
     /// <summary>
@@ -152,7 +192,7 @@ public class Boss_Controller : MonoBehaviour
     }
 
     /// <summary>
-    /// 랜덤으로 소환 스킬 또는 할로우 스킬을 선택하여 사용하는 함수
+    /// 랜덤으로 스킬을 선택하여 사용하는 함수
     /// </summary>
     public void UseRandomSkill()
     {
@@ -174,23 +214,62 @@ public class Boss_Controller : MonoBehaviour
     }
 
     /// <summary>
-    /// 소환 스킬
+    /// 소환 스킬. 1~5까지 랜덤한 숫자의 소환수를 소환
     /// </summary>
     public void SummonSkill()
     {
-        // isSummon = true;
+        isSummon = true;
+
+        summonTime = Random.Range(1, 5);
+
+        for(int i = 0; i <= summonTime; i++)
+        {
+            Instantiate(summons, summonPosition.position, summonPosition.rotation);
+        }
 
         Debug.Log("Summon");
     }
 
     /// <summary>
-    /// 할로우(통과) 스킬
+    /// 할로우(통과) 스킬. 스킬 사용중엔 공격 + 충돌 X
     /// </summary>
     public void HollowSkill()
     {
-        // isHollow = true;
+        isHollow = true;
+    }
 
-        Debug.Log("Hollow");
+    public void EnableHollow()
+    {
+        plc.enabled = false;
+    }
+
+    public void DisableHollow()
+    {
+        plc.enabled = true;
+    }
+
+
+    /// <summary>
+    /// 보스가 맞았을 때 잠시 통과할 수 있도록
+    /// </summary>
+    public void GetHit()
+    {
+        if (isHit)
+        {
+            EnableHollow();
+        }
+        else
+        {
+            DisableHollow();
+        }
+    }
+
+    /// <summary>
+    /// 컨트롤러 상태 초기화용 함수
+    /// </summary>
+    public void ResetController()
+    {
+        isHit = false;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
