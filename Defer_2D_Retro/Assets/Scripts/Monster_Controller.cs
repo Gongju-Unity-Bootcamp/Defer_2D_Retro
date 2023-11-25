@@ -90,8 +90,8 @@ public class Monster_Controller : MonoBehaviour
         }
         else if (MH.isDead && !hasAddedScore)
         {
-            // 몬스터가 죽었을 경우 5초뒤 제거
-            Destroy(gameObject, 5f);
+            // 몬스터가 죽었을 경우 3초뒤 제거
+            Destroy(gameObject, 3f);
             GameManager.instance.AddScore(100);
             hasAddedScore = true;
         }

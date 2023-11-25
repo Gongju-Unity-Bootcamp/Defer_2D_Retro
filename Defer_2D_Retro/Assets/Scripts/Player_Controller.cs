@@ -112,7 +112,7 @@ public class Player_Controller : MonoBehaviour
     /// <summary>
     /// 사망 상태를 체크하는 함수
     /// </summary>
-    private void DeadCheck()
+    public void DeadCheck()
     {
         isDead = PH.isDead;
         anim.SetBool("isDead", isDead);
@@ -182,6 +182,7 @@ public class Player_Controller : MonoBehaviour
                 jumpTime -= 1;
                 anim.SetTrigger("Jump");
                 rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);   // 위로 튀어오르는 힘
+                SoundManager.instance.PlaySFX("PlayerJump");
             }
         }
     }
@@ -274,8 +275,9 @@ public class Player_Controller : MonoBehaviour
             isWallJump = true;
             rb.velocity = new Vector3(wallJumpDirection * wallJumpPower.x, wallJumpPower.y);
             wallJumpCounter = 0f;
-            
-            if(transform.localScale.x != wallJumpDirection)
+            SoundManager.instance.PlaySFX("PlayerJump");
+
+            if (transform.localScale.x != wallJumpDirection)
             {
                 Vector3 localScale = transform.localScale;
                 localScale *= -1f;
@@ -368,6 +370,7 @@ public class Player_Controller : MonoBehaviour
         {
             isSliding = true;
             rb.AddForce(new Vector2(transform.localScale.x * slidingForce, 0), ForceMode2D.Impulse);
+            SoundManager.instance.PlaySFX("PlayerJump");
 
             Invoke(nameof(ResetSliding), 0.5f);
 
@@ -398,9 +401,10 @@ public class Player_Controller : MonoBehaviour
     public void Attack()
     {
         // 평상 공격
-        if (Input.GetKeyDown(attackKey) && !isMove)
+        if (Input.GetKeyDown(attackKey) && !isMove && isGround)
         {
             anim.SetTrigger("Attack");  // 공격 애니메이션 재생을 위함
+            SoundManager.instance.PlaySFX("PlayerAttack");
         }
     }
 
@@ -478,7 +482,7 @@ public class Player_Controller : MonoBehaviour
 
             Invoke(nameof(ResetController), 0.5f);
 
-            Debug.Log("Hurt");
+            SoundManager.instance.PlaySFX("PlayerHit");
         }
 
         // 몬스터에게 닿을 경우 피격
@@ -505,7 +509,7 @@ public class Player_Controller : MonoBehaviour
 
             Invoke(nameof(ResetController), 0.5f);
 
-            Debug.Log("Hurt");
+            SoundManager.instance.PlaySFX("PlayerHit");
         }
 
         // 보스 몬스터에게 닿을 경우 피격
@@ -532,7 +536,7 @@ public class Player_Controller : MonoBehaviour
 
             Invoke(nameof(ResetController), 0.5f);
 
-            Debug.Log("Hurt");
+            SoundManager.instance.PlaySFX("PlayerHit");
         }
     }
 

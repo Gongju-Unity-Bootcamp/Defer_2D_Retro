@@ -789,7 +789,8 @@ MonoBehaviour:
   summons: {fileID: 602520675643650228, guid: 01472f74fd02c17419a726656a561943, type: 3}
   summonPosition: {fileID: 4271489843662950350}
   anim: {fileID: 0}
-  GM: {fileID: 0}
+  area1: {fileID: 0}
+  area2: {fileID: 0}
 --- !u!114 &4453531854636277584
 MonoBehaviour:
   m_ObjectHideFlags: 0

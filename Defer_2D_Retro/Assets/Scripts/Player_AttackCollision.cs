@@ -77,7 +77,7 @@ public class Player_AttackCollision : MonoBehaviour
             // 피격받은 몬스터에게만 적용하기 위해
             other.GetComponent<Monster_Controller>().Invoke(nameof(MC.ResetController), 0.5f);
 
-            Debug.Log("HIT");
+            SoundManager.instance.PlaySFX("MonsterHit");
         }
 
         if (other.CompareTag("Summons") && !other.GetComponent<Monster_Health>().isDead)
@@ -86,7 +86,7 @@ public class Player_AttackCollision : MonoBehaviour
             // 이후에 인게임에서 이벤트 등으로 데미지 증가 가능
             other.GetComponent<Monster_Health>().TakeDamage(PC.damage);
 
-            Debug.Log("HIT");
+            SoundManager.instance.PlaySFX("MonsterHit");
         }
 
         if (other.CompareTag("Boss") && !other.GetComponent<Monster_Health>().isDead)
@@ -100,6 +100,8 @@ public class Player_AttackCollision : MonoBehaviour
 
             // 피격받은 몬스터에게만 적용하기 위해
             other.GetComponent<Boss_Controller>().Invoke(nameof(BC.ResetController), 0.5f);
+
+            SoundManager.instance.PlaySFX("MonsterHit");
         }
     }
 

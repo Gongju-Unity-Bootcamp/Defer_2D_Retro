@@ -79,10 +79,8 @@ public class Boss_Controller : MonoBehaviour
         }
         else if (MH.isDead && !hasAddedScore)
         {
-            Invoke(nameof(OnDead), 1.5f);
-
             // 몬스터가 죽었을 경우 1.5초뒤 제거
-            Destroy(gameObject, 1.5f);
+            Invoke(nameof(OnDead), 1.5f);
             GameManager.instance.AddScore(5000);
             hasAddedScore = true;
         }
@@ -92,6 +90,7 @@ public class Boss_Controller : MonoBehaviour
     public void OnDead()
     {
         UIManager.instance.ShowGameClear();
+        Destroy(gameObject);
     }
 
     /// <summary>

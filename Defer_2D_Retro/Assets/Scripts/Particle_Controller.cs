@@ -29,6 +29,7 @@ public class Particle_Controller : MonoBehaviour
     private void Update()
     {
         HandleSlideParticle();
+        HandleJumpParticle();
     }
 
     /// <summary>
@@ -51,10 +52,10 @@ public class Particle_Controller : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    public void HandleJumpParticle()
     {
-        // 점프할 때 땅이나 경사, 벽에 닿은 상태 + isGround가 true 일 경우 점프 파티클 재생
-        if ((collision.CompareTag("Ground") || collision.CompareTag("Slope") || collision.CompareTag("Wall")) && PC.isGround)
+        // 점프키를 눌렀을 때 + 벽 점프&슬라이딩 중이 아닐때 + 점프 횟수가 0이 아닐때
+        if (Input.GetKeyDown(PC.jumpKey) && !PC.isWallJump && !PC.isWallSlide && PC.jumpTime != 0)
         {
             jumpParticle.Play();
         }

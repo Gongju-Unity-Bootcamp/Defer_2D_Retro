@@ -42,7 +42,7 @@ public class Monster_AttackCollision : MonoBehaviour
             // 거리가 가까울 경우(0보다 작을 경우) 밀려나게, 아닐 경우 평소대로
             if (this.transform.parent.CompareTag("Boss"))
             {
-                if (BC.transform.localScale.x > 0)
+                if (this.GetComponentInParent<Boss_Controller>().transform.localScale.x > 0)
                 {
                     if (distance.x < 0)
                     {
@@ -67,7 +67,7 @@ public class Monster_AttackCollision : MonoBehaviour
             }
             else
             {
-                if (MC.transform.localScale.x > 0)
+                if (this.GetComponentInParent<Monster_Controller>().transform.localScale.x > 0)
                 {
                     if (distance.x < 0)
                     {
@@ -111,7 +111,8 @@ public class Monster_AttackCollision : MonoBehaviour
 
             PC.Invoke(nameof(PC.ResetController), 0.5f);
 
-            Debug.Log("HIT");
+            SoundManager.instance.PlaySFX("MonsterAttack");
+            SoundManager.instance.PlaySFX("PlayerHit");
         }
 	}
 
