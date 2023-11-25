@@ -52,9 +52,6 @@ public class Monster_Controller : MonoBehaviour
     public LayerMask groundLayer;
     public LayerMask slopeLayer;
 
-    [Header("GameManager")]
-    public GameManager GM;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -63,8 +60,6 @@ public class Monster_Controller : MonoBehaviour
         PC = FindObjectOfType<Player_Controller>();
         MH = GetComponent<Monster_Health>();
         anim = GetComponent<Animator>();
-
-        GM = FindObjectOfType<GameManager>();
 
         // 초기 위치 저장
         startPosition = transform.position;
@@ -97,7 +92,7 @@ public class Monster_Controller : MonoBehaviour
         {
             // 몬스터가 죽었을 경우 5초뒤 제거
             Destroy(gameObject, 5f);
-            GM.AddScore(100);
+            GameManager.instance.AddScore(100);
             hasAddedScore = true;
         }
 

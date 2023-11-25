@@ -43,9 +43,6 @@ public class Boss_Controller : MonoBehaviour
     [Header("Animation")]
     public Animator anim;
 
-    [Header("GameManager")]
-    public GameManager GM;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -54,8 +51,6 @@ public class Boss_Controller : MonoBehaviour
         PC = FindObjectOfType<Player_Controller>();
         MH = GetComponent<Monster_Health>();
         anim = GetComponent<Animator>();
-
-        GM = FindObjectOfType<GameManager>();
     }
 
     // Update is called once per frame
@@ -84,12 +79,19 @@ public class Boss_Controller : MonoBehaviour
         }
         else if (MH.isDead && !hasAddedScore)
         {
+            Invoke(nameof(OnDead), 1.5f);
+
             // 몬스터가 죽었을 경우 1.5초뒤 제거
             Destroy(gameObject, 1.5f);
-            GM.AddScore(5000);
+            GameManager.instance.AddScore(5000);
             hasAddedScore = true;
         }
         AnimControl();
+    }
+
+    public void OnDead()
+    {
+        UIManager.instance.ShowGameClear();
     }
 
     /// <summary>
