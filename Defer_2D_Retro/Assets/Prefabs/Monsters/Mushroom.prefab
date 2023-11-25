@@ -442,6 +442,7 @@ MonoBehaviour:
   isPatrolStop: 0
   isAttack: 0
   isHit: 0
+  hasAddedScore: 0
   anim: {fileID: 0}
   attackCollider: {fileID: 7546631174806012119}
   groundLayer:
@@ -450,6 +451,7 @@ MonoBehaviour:
   slopeLayer:
     serializedVersion: 2
     m_Bits: 128
+  potion: {fileID: 3858296392070350399, guid: a75b2c4ac2bab0840aa24189f2b6c35b, type: 3}
 --- !u!1 &7061198334885785211
 GameObject:
   m_ObjectHideFlags: 0
@@ -731,6 +733,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MC: {fileID: 0}
+  BC: {fileID: 0}
   PC: {fileID: 0}
   knockbackForce: 30
 --- !u!1 &8888073473301123321

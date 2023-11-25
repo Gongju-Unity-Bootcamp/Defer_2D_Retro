@@ -63,6 +63,9 @@ public class Player_Health : MonoBehaviour
     {
         if (currentHealth != healthSlider.value)
         {
+            // 현재 체력이 최대 체력을 넘지 못하게
+            currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
             // Lerp 함수를 사용하여 체력바를 부드럽게 감소시킴
             float newHealthValue = Mathf.Lerp(healthSlider.value, currentHealth, Time.deltaTime * decreaseSpeed);
             healthSlider.value = newHealthValue;

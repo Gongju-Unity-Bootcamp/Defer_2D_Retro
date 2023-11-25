@@ -52,6 +52,10 @@ public class Monster_Controller : MonoBehaviour
     public LayerMask groundLayer;
     public LayerMask slopeLayer;
 
+    [Header("Item Drop")]
+    public GameObject potion;
+    public GameObject potionSpawned;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -94,9 +98,34 @@ public class Monster_Controller : MonoBehaviour
             Destroy(gameObject, 3f);
             GameManager.instance.AddScore(100);
             hasAddedScore = true;
+
+            DropPotion();
+            Destroy(potionSpawned, 10f);
         }
 
         AnimControl();
+    }
+
+    /// <summary>
+    /// 랜덤한 확률로 포션을 드롭하게 하는 함수
+    /// </summary>
+    public void DropPotion()
+    {
+        // 확률을 설정할 변수
+        float dropChance = 0.3f;
+
+        // 0에서 1 사이의 랜덤한 값 생성
+        float randomValue = Random.value;
+
+        // 랜덤 값이 확률보다 작으면 potion 생성
+        if (randomValue < dropChance)
+        {
+            potionSpawned = Instantiate(potion, transform.position, Quaternion.identity);
+
+            Vector2 force = new Vector2(0, 10f);
+
+            potionSpawned.GetComponent<Rigidbody2D>().AddForce(force, ForceMode2D.Impulse);
+        }
     }
 
     /// <summary>

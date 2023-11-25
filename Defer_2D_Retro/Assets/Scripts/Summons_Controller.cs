@@ -18,8 +18,15 @@ public class Summons_Controller : MonoBehaviour
     [Header("Trace")]
     public float moveSpeed = 20f;
 
+    [Header("Bools")]
+    public bool hasAddedScore = false;
+
     [Header("Animation")]
     public Animator anim;
+
+    [Header("Item Drop")]
+    public GameObject potion;
+    public GameObject potionSpawned;
 
     // Start is called before the first frame update
     void Start()
@@ -42,12 +49,39 @@ public class Summons_Controller : MonoBehaviour
                 Trace();
             }
         }
-        else if (MH.isDead)
+        else if (MH.isDead && !hasAddedScore)
         {
             Destroy(this.gameObject, 0.85f);
+            GameManager.instance.AddScore(10);
+            hasAddedScore = true;
+
+            DropPotion();
+            Destroy(potionSpawned, 10f);
         }
 
         AnimControl();
+    }
+
+    /// <summary>
+    /// 랜덤한 확률로 포션을 드롭하게 하는 함수
+    /// </summary>
+    public void DropPotion()
+    {
+        // 확률을 설정할 변수
+        float dropChance = 0.3f;
+
+        // 0에서 1 사이의 랜덤한 값 생성
+        float randomValue = Random.value;
+
+        // 랜덤 값이 확률보다 작으면 potion 생성
+        if (randomValue < dropChance)
+        {
+            potionSpawned = Instantiate(potion, transform.position, Quaternion.identity);
+
+            Vector2 force = new Vector2(0, 10f);
+
+            potionSpawned.GetComponent<Rigidbody2D>().AddForce(force, ForceMode2D.Impulse);
+        }
     }
 
     /// <summary>
