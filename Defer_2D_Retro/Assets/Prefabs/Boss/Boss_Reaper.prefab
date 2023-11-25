@@ -558,6 +558,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MC: {fileID: 0}
+  BC: {fileID: 0}
   PC: {fileID: 0}
   knockbackForce: 30
 --- !u!1 &6762914944958308876
@@ -774,11 +775,12 @@ MonoBehaviour:
   plc: {fileID: 0}
   PC: {fileID: 0}
   distanceToPlayer: 0
-  moveSpeed: 30
+  moveSpeed: 20
   isAttack: 0
   isSummon: 0
   isHollow: 0
   isHit: 0
+  hasAddedScore: 0
   attackCollider: {fileID: 6447439395508228558}
   summonCooldown: 20
   hollowCooldown: 15
@@ -787,6 +789,7 @@ MonoBehaviour:
   summons: {fileID: 602520675643650228, guid: 01472f74fd02c17419a726656a561943, type: 3}
   summonPosition: {fileID: 4271489843662950350}
   anim: {fileID: 0}
+  GM: {fileID: 0}
 --- !u!114 &4453531854636277584
 MonoBehaviour:
   m_ObjectHideFlags: 0

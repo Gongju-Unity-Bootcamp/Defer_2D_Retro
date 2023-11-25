@@ -34,6 +34,11 @@ public class Player_Health : MonoBehaviour
         UpdateHealth();
         UpdateHealthText(currentHealth, maxHealth);
         CheckHealth();
+
+        if (isDead)
+        {
+            UIManager.instance.ShowGameOver();
+        }
     }
 
     /// <summary>
@@ -41,7 +46,7 @@ public class Player_Health : MonoBehaviour
     /// </summary>
     public void CheckHealth()
     {
-        if(currentHealth == 0 || transform.position.y <= -15f)
+        if(currentHealth == 0 || transform.position.y <= -50f)
         {
             isDead = true;
         }

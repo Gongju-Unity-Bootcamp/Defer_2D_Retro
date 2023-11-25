@@ -24,6 +24,7 @@ public class Boss_Controller : MonoBehaviour
     public bool isSummon = false;
     public bool isHollow = false;
     public bool isHit = false;
+    public bool hasAddedScore = false;
 
     [Header("Attack")]
     public GameObject attackCollider;
@@ -42,6 +43,9 @@ public class Boss_Controller : MonoBehaviour
     [Header("Animation")]
     public Animator anim;
 
+    [Header("GameManager")]
+    public GameManager GM;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -50,6 +54,8 @@ public class Boss_Controller : MonoBehaviour
         PC = FindObjectOfType<Player_Controller>();
         MH = GetComponent<Monster_Health>();
         anim = GetComponent<Animator>();
+
+        GM = FindObjectOfType<GameManager>();
     }
 
     // Update is called once per frame
@@ -76,20 +82,14 @@ public class Boss_Controller : MonoBehaviour
             Attack();
             GetHit();
         }
-        else if (MH.isDead)
+        else if (MH.isDead && !hasAddedScore)
         {
-            // 몬스터가 죽었을 경우 1.5초뒤 OnDead 실행(비활성화)
-            Invoke(nameof(OnDead), 1.5f);
+            // 몬스터가 죽었을 경우 1.5초뒤 제거
+            Destroy(gameObject, 1.5f);
+            GM.AddScore(5000);
+            hasAddedScore = true;
         }
         AnimControl();
-    }
-
-    /// <summary>
-    /// 몬스터가 죽었을 때 비활성화 시키는 함수
-    /// </summary>
-    public void OnDead()
-    {
-        gameObject.SetActive(false);
     }
 
     /// <summary>

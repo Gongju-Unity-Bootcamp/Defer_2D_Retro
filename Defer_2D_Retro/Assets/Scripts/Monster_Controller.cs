@@ -40,6 +40,7 @@ public class Monster_Controller : MonoBehaviour
     public bool isPatrolStop = false;
     public bool isAttack = false;
     public bool isHit = false;
+    public bool hasAddedScore = false;
 
     [Header("Animation")]
     public Animator anim;
@@ -51,6 +52,9 @@ public class Monster_Controller : MonoBehaviour
     public LayerMask groundLayer;
     public LayerMask slopeLayer;
 
+    [Header("GameManager")]
+    public GameManager GM;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -59,6 +63,8 @@ public class Monster_Controller : MonoBehaviour
         PC = FindObjectOfType<Player_Controller>();
         MH = GetComponent<Monster_Health>();
         anim = GetComponent<Animator>();
+
+        GM = FindObjectOfType<GameManager>();
 
         // 초기 위치 저장
         startPosition = transform.position;
@@ -87,21 +93,15 @@ public class Monster_Controller : MonoBehaviour
             Jump();
             SlopeCheck();
         }
-        else if (MH.isDead)
+        else if (MH.isDead && !hasAddedScore)
         {
-            // 몬스터가 죽었을 경우 5초뒤 OnDead 실행(비활성화)
-            Invoke(nameof(OnDead), 5f);
+            // 몬스터가 죽었을 경우 5초뒤 제거
+            Destroy(gameObject, 5f);
+            GM.AddScore(100);
+            hasAddedScore = true;
         }
 
         AnimControl();
-    }
-
-    /// <summary>
-    /// 몬스터가 죽었을 때 비활성화 시키는 함수
-    /// </summary>
-    public void OnDead()
-    {
-        gameObject.SetActive(false);
     }
 
     /// <summary>
