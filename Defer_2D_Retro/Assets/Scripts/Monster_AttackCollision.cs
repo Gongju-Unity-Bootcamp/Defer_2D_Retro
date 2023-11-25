@@ -6,6 +6,9 @@ public class Monster_AttackCollision : MonoBehaviour
     [Header("Monster")]
     public Monster_Controller MC;
 
+    [Header("Boss")]
+    public Boss_Controller BC;
+
     [Header("Player")]
     public Player_Controller PC;
 
@@ -15,6 +18,7 @@ public class Monster_AttackCollision : MonoBehaviour
     private void Awake()
     {
         MC = FindObjectOfType<Monster_Controller>();
+        BC = FindObjectOfType<Boss_Controller>();
         PC = FindObjectOfType<Player_Controller>();
     }
 
@@ -36,26 +40,54 @@ public class Monster_AttackCollision : MonoBehaviour
 
             // 몬스터의 로컬 스케일로 몬스터가 바라보는 방향을 결정
             // 거리가 가까울 경우(0보다 작을 경우) 밀려나게, 아닐 경우 평소대로
-            if (MC.transform.localScale.x > 0)
+            if (this.transform.parent.CompareTag("Boss"))
             {
-                if (distance.x < 0 )
+                if (this.GetComponentInParent<Boss_Controller>().transform.localScale.x > 0)
                 {
-                    difference = -(transform.position - other.transform.position).normalized;
+                    if (distance.x < 0)
+                    {
+                        difference = -(transform.position - other.transform.position).normalized;
+                    }
+                    else
+                    {
+                        difference = (transform.position - other.transform.position).normalized;
+                    }
                 }
                 else
                 {
-                    difference = (transform.position - other.transform.position).normalized;
+                    if (distance.x < 0)
+                    {
+                        difference = (transform.position - other.transform.position).normalized;
+                    }
+                    else
+                    {
+                        difference = -(transform.position - other.transform.position).normalized;
+                    }
                 }
             }
             else
             {
-                if (distance.x < 0)
+                if (this.GetComponentInParent<Monster_Controller>().transform.localScale.x > 0)
                 {
-                    difference = (transform.position - other.transform.position).normalized;
+                    if (distance.x < 0)
+                    {
+                        difference = -(transform.position - other.transform.position).normalized;
+                    }
+                    else
+                    {
+                        difference = (transform.position - other.transform.position).normalized;
+                    }
                 }
                 else
                 {
-                    difference = -(transform.position - other.transform.position).normalized;
+                    if (distance.x < 0)
+                    {
+                        difference = (transform.position - other.transform.position).normalized;
+                    }
+                    else
+                    {
+                        difference = -(transform.position - other.transform.position).normalized;
+                    }
                 }
             }
 
@@ -79,7 +111,8 @@ public class Monster_AttackCollision : MonoBehaviour
 
             PC.Invoke(nameof(PC.ResetController), 0.5f);
 
-            Debug.Log("HIT");
+            SoundManager.instance.PlaySFX("MonsterAttack");
+            SoundManager.instance.PlaySFX("PlayerHit");
         }
 	}
 

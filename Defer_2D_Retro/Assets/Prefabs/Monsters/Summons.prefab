@@ -217,7 +217,7 @@ MonoBehaviour:
   rb: {fileID: 0}
   bc: {fileID: 0}
   PC: {fileID: 0}
-  moveSpeed: 20
+  moveSpeed: 15
   anim: {fileID: 0}
 --- !u!114 &6249368108334357795
 MonoBehaviour:

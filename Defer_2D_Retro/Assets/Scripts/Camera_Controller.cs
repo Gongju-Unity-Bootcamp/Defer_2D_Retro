@@ -18,6 +18,12 @@ public class Camera_Controller : MonoBehaviour
     [Header("Speed")]
     public float cameraSpeed = 8.0f;
 
+    [Header("Area Limits")]
+    public float minX = -150.0f;
+    public float maxX = 150.0f;
+    public float minY = -50.0f;
+    public float maxY = 50.0f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,7 +40,9 @@ public class Camera_Controller : MonoBehaviour
         if (!PH.isDead)
         {
             // 카메라의 위치 = 플레이어의 위치 좌표 + 오프셋
-            targetVector = new Vector3(player.position.x + offsetX, player.position.y + 2.5f + offsetY, -10f + offsetZ);
+            // Mathf.Clamp로 카메라의 영역을 제한
+            targetVector = new Vector3(Mathf.Clamp(player.position.x + offsetX, minX, maxX), Mathf.Clamp(player.position.y + 2.5f + offsetY, minY, maxY), -10f + offsetZ);
+
 
             // 카메라의 위치를 targetVector로 부드럽게 이동
             transform.position = Vector3.Lerp(transform.position, targetVector, Time.deltaTime * cameraSpeed);
@@ -77,5 +85,20 @@ public class Camera_Controller : MonoBehaviour
                 offsetZ = 0;
             }
         }
+    }
+
+    // OnDrawGizmos 함수를 이용하여 제한 영역 표시
+    public void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        // 상단 가로선
+        Gizmos.DrawLine(new Vector3(minX, maxY, 0), new Vector3(maxX, maxY, 0));
+        // 하단 가로선
+        Gizmos.DrawLine(new Vector3(minX, minY, 0), new Vector3(maxX, minY, 0));
+        // 좌측 세로선
+        Gizmos.DrawLine(new Vector3(minX, minY, 0), new Vector3(minX, maxY, 0));
+        // 우측 세로선
+        Gizmos.DrawLine(new Vector3(maxX, minY, 0), new Vector3(maxX, maxY, 0));
     }
 }

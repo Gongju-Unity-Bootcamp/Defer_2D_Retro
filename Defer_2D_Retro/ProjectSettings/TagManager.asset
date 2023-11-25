@@ -11,6 +11,7 @@ TagManager:
   - Boss
   - Summons
   - BossArea
+  - NormalArea
   layers:
   - Default
   - TransparentFX
