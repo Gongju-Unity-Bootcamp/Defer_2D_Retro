@@ -538,6 +538,13 @@ public class Player_Controller : MonoBehaviour
 
             SoundManager.instance.PlaySFX("PlayerHit");
         }
+
+        // 포션에 닿으면 체력 회복 + 포션 오브젝트 제거
+        if (collision.collider.CompareTag("Potion"))
+        {
+            PH.currentHealth += 20;
+            Destroy(collision.collider.gameObject);
+        }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
