@@ -122,7 +122,7 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("Stage1");
         PlayerPrefs.SetInt("Score", 0);
         StartStopwatch();
     }
