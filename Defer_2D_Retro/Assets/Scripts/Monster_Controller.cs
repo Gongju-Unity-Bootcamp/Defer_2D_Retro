@@ -171,8 +171,8 @@ public class Monster_Controller : MonoBehaviour
         Vector3 front = new Vector3(transform.position.x + 1f, transform.position.y, 0);
         Vector3 back = new Vector3(transform.position.x - 1f, transform.position.y, 0);
 
-        RaycastHit2D frontHit = Physics2D.Raycast(front, new Vector2(0, -1), Mathf.Infinity, slopeLayer);
-        RaycastHit2D backHit = Physics2D.Raycast(back, new Vector2(0, -1), Mathf.Infinity, slopeLayer);
+        RaycastHit2D frontHit = Physics2D.Raycast(front, new Vector2(0, -1), 5f, slopeLayer);
+        RaycastHit2D backHit = Physics2D.Raycast(back, new Vector2(0, -1), 5f, slopeLayer);
 
         Debug.DrawRay(front, new Vector3(0, -0.5f, 0), Color.red);
         Debug.DrawRay(back, new Vector3(0, -0.5f, 0), Color.red);
